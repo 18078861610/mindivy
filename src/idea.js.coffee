@@ -21,18 +21,30 @@ class Idea
     @fsm = StateMachine.create
       initial: 'common'
       events: [
-        { name: 'select',         from: 'common',       to: 'active'}
-        { name: 'edit_text',      from: 'active',       to: 'editing_text' }
-        { name: 'stop_edit_text', from: 'editing_text', to: 'active' }
+        { name: 'select',   from: 'common', to: 'active'}
+        { name: 'unselect', from: 'active', to: 'common'}
+
+        { name: 'start_edit', from: 'active',  to: 'editing' }
+        { name: 'stop_edit',  from: 'editing', to: 'active' }
       ]
 
-    # 切换到节点文字编辑状态
-    @fsm.onenterediting_text = =>
-      @mindmap.editing_idea = @
+    # 切换与退出选中状态
+    @fsm.onselect = =>
+      @mindmap.active_idea = @
+      @$el.addClass('active')
 
-      @$el.addClass 'editing-text'
+    @fsm.onunselect = =>
+      @mindmap.active_idea = null
+      @$el.removeClass('active')
+
+
+    # 切换与退出编辑状态
+    @fsm.onenterediting = =>
+      @mindmap.editing_idea = @
+      @$el.addClass 'editing'
+
       # 计算 textarea 的初始大小
-      t_width = @$text.width()
+      t_width  = @$text.width()
       t_height = @$text.height()
 
       @$text_ipter = jQuery '<textarea>'
@@ -46,22 +58,14 @@ class Idea
       .focus()
 
 
-    @fsm.onleaveediting_text = =>
+    @fsm.onleaveediting = =>
       @mindmap.editing_idea = null
+      @$el.removeClass 'editing'
 
-      @$el.removeClass 'editing-text'
       @$text_ipter.remove()
 
       # 获取 textarea 中的文字，写入节点 dom
       @set_text @get_text_ipter_text()
-
-    @fsm.onenteractive = =>
-      @mindmap.active_idea = @
-      @$el.addClass('active')
-
-    @fsm.onleaveeactive = =>
-      @mindmap.active_idea = null
-      @$el.removeClass('active')
 
 
   # 设置节点文字
@@ -72,18 +76,21 @@ class Idea
 
   # 在节点编辑状态下时获取 textarea 中的文本
   get_text_ipter_text: ->
-    if @fsm.is 'editing_text'
+    if @fsm.is 'editing'
       return @$text_ipter.val().replace /\n/g, '<br/>'
 
+   # 输入文字的同时动态调整 textarea 的大小
   adjust_text_ipter_size: ->
-    text = @get_text_ipter_text()
-    @$text.html text
-    width = @$text.width()
-    height = @$text.height()
+    setTimeout =>
+      text = @get_text_ipter_text()
+      @$text.html text
 
-    @$text_ipter.css
-      'width': width
-      'height': height
+      width = @$text.width()
+      height = @$text.height()
+
+      @$text_ipter.css
+        'width': width
+        'height': height
 
   render: ->
     $el = jQuery '<div>'
@@ -122,22 +129,23 @@ class Idea
         left: left
         top: top
 
-  # 开始编辑节点文字
-  edit_text: ->
-    console.log "开始编辑节点 #{@id} 文字：#{@text}"
-    @fsm.edit_text()
+  # 处理节点点击事件
+  handle_click: ->
+    return @fsm.select() if @fsm.can 'select'
+    return @fsm.start_edit() if @fsm.can 'start_edit'
 
-  # 结束节点文字编辑
-  stop_edit_text: ->
-    console.log "结束节点文字编辑"
-    @fsm.stop_edit_text()
+  # 处理节点外点击事件
+  handle_click_out: ->
+    @fsm.stop_edit() if @fsm.can 'stop_edit'
+    @fsm.unselect() if @fsm.can 'unselect'
 
-  select: ->
-    @fsm.select()
+  # 处理空格按下事件
+  handle_space_keypress: ->
+    @fsm.start_edit() if @fsm.can 'start_edit'
 
-  # 判断节点是否被选中
-  is_active: ->
-    return @fsm.is 'active'
+  handle_enter_keypress: ->
+    @fsm.stop_edit() if @fsm.can 'stop_edit'
+
 
 window.Idea = Idea
 window.Utils = Utils

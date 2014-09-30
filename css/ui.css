@@ -2,7 +2,8 @@
 body.editor {
   background-color: #f1f1f1;
   font-family: arial, "微软雅黑";
-  font-size: 14px; }
+  font-size: 14px;
+  color: #333; }
   body.editor textarea, body.editor pre, body.editor code {
     font-family: arial, "微软雅黑"; }
   body.editor pre, body.editor code {
@@ -12,8 +13,8 @@ body.editor {
 
 .mindmap .ops {
   position: absolute;
-  top: 10px;
-  right: 10px; }
+  left: 10px;
+  top: 10px; }
   .mindmap .ops a.op {
     display: block;
     height: 30px;
@@ -21,18 +22,20 @@ body.editor {
     background-color: #ffe08b;
     border-radius: 3px;
     color: #333;
-    padding: 0 10px; }
+    padding: 0 10px;
+    float: left;
+    margin-right: 10px; }
     .mindmap .ops a.op:hover {
       text-decoration: none;
       background-color: #ffe7a5; }
 
 .mindmap {
-  background-color: #FFF;
   position: fixed;
   top: 10px;
   left: 10px;
   right: 10px;
   bottom: 10px;
+  background-color: #FFF;
   box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
   border-radius: 4px;
   -webkit-user-select: none; }
@@ -44,50 +47,43 @@ body.editor {
     bottom: 0;
     z-index: -1; }
   .mindmap .idea {
-    background-color: #444;
     position: absolute;
-    border-radius: 3px;
-    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
     cursor: pointer;
     font-size: 0;
-    border: solid 3px transparent; }
+    background-color: #bde4fb;
+    border: solid 3px transparent;
+    -webkit-transition: all 0.5s ease-out;
+    -moz-transition: all 0.5s ease-out;
+    -ms-transition: all 0.5s ease-out;
+    -o-transition: all 0.5s ease-out;
+    transition: all 0.5s ease-out; }
+    .mindmap .idea:hover {
+      border-color: #74c6f8; }
+    .mindmap .idea.active {
+      border-color: rgba(0, 0, 0, 0.5); }
     .mindmap .idea .text {
       min-height: 24px;
       line-height: 24px;
-      color: white;
       font-size: 16px;
       overflow: hidden;
       padding: 5px 15px;
       white-space: nowrap; }
-    .mindmap .idea.active {
-      border-color: #888; }
-    .mindmap .idea.editing-text {
-      background-color: #44B2F5; }
-      .mindmap .idea.editing-text:before {
-        content: "editing";
-        position: absolute;
-        top: -15px;
-        left: 0;
-        font-size: 12px;
-        height: 12px;
-        line-height: 12px;
-        background-color: #FFFBE3;
-        border-radius: 2px;
-        padding: 0 5px;
-        color: #333; }
-      .mindmap .idea.editing-text .text {
+    .mindmap .idea.editing {
+      background-color: #eeeeee; }
+      .mindmap .idea.editing .text {
         position: absolute;
         pointer-events: none;
         opacity: 0; }
-      .mindmap .idea.editing-text textarea.text-ipter {
+      .mindmap .idea.editing textarea.text-ipter {
         resize: none;
         border: 0 none;
         padding: 0;
         margin: 0;
         background: transparent;
+        outline: none;
         min-height: 24px;
         line-height: 24px;
-        color: white;
         font-size: 16px;
         overflow: hidden;
         padding: 5px 15px;
