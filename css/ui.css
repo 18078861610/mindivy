@@ -46,45 +46,49 @@ body.editor {
     right: 0;
     bottom: 0;
     z-index: -1; }
-  .mindmap .idea {
+  .mindmap .ideas-area {
     position: absolute;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0;
-    background-color: #bde4fb;
-    border: solid 3px transparent;
-    -webkit-transition: all 0.5s ease-out;
-    -moz-transition: all 0.5s ease-out;
-    -ms-transition: all 0.5s ease-out;
-    -o-transition: all 0.5s ease-out;
-    transition: all 0.5s ease-out; }
-    .mindmap .idea:hover {
-      border-color: #74c6f8; }
-    .mindmap .idea.active {
-      border-color: rgba(0, 0, 0, 0.5); }
-    .mindmap .idea .text {
-      min-height: 24px;
-      line-height: 24px;
-      font-size: 16px;
-      overflow: hidden;
-      padding: 5px 15px;
-      white-space: nowrap; }
-    .mindmap .idea.editing {
-      background-color: #eeeeee; }
-      .mindmap .idea.editing .text {
-        position: absolute;
-        pointer-events: none;
-        opacity: 0; }
-      .mindmap .idea.editing textarea.text-ipter {
-        resize: none;
-        border: 0 none;
-        padding: 0;
-        margin: 0;
-        background: transparent;
-        outline: none;
+    top: 50%;
+    left: 50%; }
+    .mindmap .ideas-area .idea {
+      position: absolute;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0;
+      background-color: #bde4fb;
+      border: solid 3px transparent;
+      -webkit-transition: all 0.3s ease-out;
+      -moz-transition: all 0.3s ease-out;
+      -ms-transition: all 0.3s ease-out;
+      -o-transition: all 0.3s ease-out;
+      transition: all 0.3s ease-out; }
+      .mindmap .ideas-area .idea:hover {
+        border-color: #74c6f8; }
+      .mindmap .ideas-area .idea.active {
+        border-color: rgba(0, 0, 0, 0.5); }
+      .mindmap .ideas-area .idea .text {
         min-height: 24px;
         line-height: 24px;
         font-size: 16px;
         overflow: hidden;
-        padding: 5px 15px;
+        padding: 0px 5px;
         white-space: nowrap; }
+      .mindmap .ideas-area .idea.editing {
+        background-color: #eeeeee; }
+        .mindmap .ideas-area .idea.editing .text {
+          position: absolute;
+          pointer-events: none;
+          opacity: 0; }
+        .mindmap .ideas-area .idea.editing textarea.text-ipter {
+          resize: none;
+          border: 0 none;
+          padding: 0;
+          margin: 0;
+          background: transparent;
+          outline: none;
+          min-height: 24px;
+          line-height: 24px;
+          font-size: 16px;
+          overflow: hidden;
+          padding: 0px 5px;
+          white-space: nowrap; }

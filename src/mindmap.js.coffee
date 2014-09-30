@@ -1,5 +1,10 @@
 class Mindmap
   constructor: (@$el)->
+    @IDEA_Y_PADDING = 10
+    @IDEA_X_PADDING = 30
+
+    @$ideas_area = @$el.find('.ideas-area')
+
     @ideas = {}
     @bind_ideas_events()
 
@@ -11,9 +16,50 @@ class Mindmap
 
   render: ->
     for id, idea of @ideas
-      @$el.append idea.render()
+      @$ideas_area.append idea.render() if not idea.rendered
     @center_to @root_idea
+
+    @layout()
+
     return @
+
+  # 重新对所有节点布局
+  layout: ->
+    # 第一次遍历：求出所有节点的区域高度
+    # 区域高度的含义是，容纳节点及其所有子孙节点的区域的高度
+    @_layout_r1 @root_idea
+
+    # for id, idea of @ideas
+    #   console.log id, idea.area_height
+
+    # 第二次遍历：定位所有节点
+    @root_idea.pos 0, 0
+    @_layout_r2 @root_idea
+
+  _layout_r1: (idea)->
+    idea.children_height = 0
+    for child_idea in idea.children
+      idea.children_height += @_layout_r1 child_idea
+
+    idea.children_height += @IDEA_Y_PADDING * (idea.children.length - 1)
+
+    idea.this_height = idea.size().height
+    idea.area_height = Math.max idea.this_height, idea.children_height
+
+  _layout_r2: (idea)->
+    mid_y = idea.layout_top + idea.this_height / 2.0
+    children_top = mid_y - idea.children_height / 2.0
+    children_left = idea.layout_left + idea.size().width + @IDEA_X_PADDING
+
+    t = children_top
+    for child_idea in idea.children
+      left = children_left
+      top = t + (child_idea.area_height - child_idea.this_height) / 2.0
+      child_idea.pos left, top
+      @_layout_r2 child_idea
+
+      t += child_idea.area_height + @IDEA_Y_PADDING
+
 
   add: (idea)->
     @ideas[idea.id] = idea
@@ -23,20 +69,20 @@ class Mindmap
 
   # 使得指定的节点在编辑器界面内居中显示
   center_to: (idea, is_animate)->
-    editor_size = @get_editor_size()
-    editor_width = editor_size.width
-    editor_height = editor_size.height
+    # editor_size = @get_editor_size()
+    # editor_width = editor_size.width
+    # editor_height = editor_size.height
 
-    idea_size = idea.size()
-    idea_width = idea_size.width
-    idea_height = idea_size.height
+    # idea_size = idea.size()
+    # idea_width = idea_size.width
+    # idea_height = idea_size.height
 
-    # console.log editor_width, editor_height, idea_width, idea_height
+    # # console.log editor_width, editor_height, idea_width, idea_height
 
-    idea_left = (editor_width - idea_width) / 2
-    idea_top  = (editor_height - idea_height) / 2
+    # idea_left = (editor_width - idea_width) / 2
+    # idea_top  = (editor_height - idea_height) / 2
 
-    idea.pos(idea_left, idea_top, is_animate)
+    # idea.pos(idea_left, idea_top, is_animate)
 
   # 在选择的节点上新增子节点
   insert_idea: ->
@@ -44,7 +90,8 @@ class Mindmap
       console.log '没有选中任何节点，无法增加子节点'
       return
 
-
+    @add @active_idea.insert_idea()
+    @render()
 
 
   get_editor_size: ->
@@ -104,7 +151,26 @@ class Mindmap
 
 jQuery(document).ready ->
   mindmap = new Mindmap jQuery('.mindmap')
-  mindmap.init().render()
+  mindmap.init()
+
+  mindmap.add mindmap.root_idea.insert_idea()
+  mindmap.add mindmap.root_idea.insert_idea()
+  mindmap.add mindmap.root_idea.insert_idea()
+  mindmap.add mindmap.root_idea.insert_idea()
+  
+  mindmap.add mindmap.root_idea.children[0].insert_idea()
+  mindmap.add mindmap.root_idea.children[0].insert_idea()
+
+  mindmap.add mindmap.root_idea.children[2].insert_idea()
+  mindmap.add mindmap.root_idea.children[2].insert_idea()
+  mindmap.add mindmap.root_idea.children[2].insert_idea()
+
+  mindmap.add mindmap.root_idea.children[2].children[2].insert_idea()
+  mindmap.add mindmap.root_idea.children[2].children[2].insert_idea()
+
+
+  mindmap.render()
+
 
 
   # 设置工具按钮操作事件

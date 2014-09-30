@@ -16,6 +16,8 @@ class Idea
     # STATES = ['common', 'editing_text', 'active']
     @init_fsm()
     @id = Utils.generate_id()
+    @children = []
+
   
   init_fsm: ->
     @fsm = StateMachine.create
@@ -29,11 +31,14 @@ class Idea
       ]
 
     # 切换与退出选中状态
-    @fsm.onselect = =>
+    @fsm.onbeforeselect = =>
+      if @mindmap.active_idea and @mindmap.active_idea != @
+        @mindmap.active_idea.handle_click_out()
+
       @mindmap.active_idea = @
       @$el.addClass('active')
 
-    @fsm.onunselect = =>
+    @fsm.onbeforeunselect = =>
       @mindmap.active_idea = null
       @$el.removeClass('active')
 
@@ -93,19 +98,20 @@ class Idea
         'height': height
 
   render: ->
-    $el = jQuery '<div>'
+    # 当前节点 dom
+    @$el = jQuery '<div>'
       .addClass 'idea'
       .data 'id', @id
 
-    $text = jQuery '<div>'
+    # 节点上的文字
+    @$text = jQuery '<div>'
       .addClass 'text'
       .html @text
-      .appendTo $el
+      .appendTo @$el
 
-    @$el = $el
-    @$text = $text
+    @rendered = true
 
-    return $el
+    return @$el
 
   # 计算节点的尺寸，便于其他计算使用
   size: ->
@@ -119,6 +125,9 @@ class Idea
 
   # 将节点定位到编辑器的指定相对位置
   pos: (left, top, is_animate)->
+    @layout_left = left
+    @layout_top = top
+
     if is_animate
       @$el.animate
         left: left
@@ -128,6 +137,14 @@ class Idea
       @$el.css
         left: left
         top: top
+
+
+  # 增加一个新的子节点
+  insert_idea: ->
+    child_idea = new Idea 'new idea', @mindmap
+    @children.push child_idea
+    child_idea
+
 
   # 处理节点点击事件
   handle_click: ->

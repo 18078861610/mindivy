@@ -59,7 +59,7 @@ body.editor {
   line-height:24px;
   font-size:16px;
   overflow:hidden;
-  padding:5px 15px;
+  padding:0px 5px;
   white-space: nowrap;
 }
 
@@ -77,34 +77,41 @@ body.editor {
     z-index:-1;
   }
 
-  .idea {
+  .ideas-area {
     position:absolute;
-    border-radius:4px;
-    cursor: pointer;
-    font-size: 0;
-    background-color:$idea-bg-common;
-    border:solid 3px transparent;
-    @include transition(all .5s ease-out);
+    top:50%;
+    left:50%;
+
+    .idea {
+      position:absolute;
+      border-radius:4px;
+      cursor: pointer;
+      font-size: 0;
+      background-color:$idea-bg-common;
+      border:solid 3px transparent;
+      @include transition(all .3s ease-out);
 
 
-    &:hover  { border-color: $idea-hover-border;}
-    &.active { border-color: $idea-active-border;}
-    
+      &:hover  { border-color: $idea-hover-border;}
+      &.active { border-color: $idea-active-border;}
+      
 
-    .text {@include root_idea;}
+      .text {@include root_idea;}
 
 
-    &.editing {
-      background-color: $idea-editing-text-bg;
-      .text {
-        position:absolute;
-        pointer-events:none;
-        opacity:0;
-      }
-      textarea.text-ipter {
-        @include textarea-reset;
-        @include root_idea;
+      &.editing {
+        background-color: $idea-editing-text-bg;
+        .text {
+          position:absolute;
+          pointer-events:none;
+          opacity:0;
+        }
+        textarea.text-ipter {
+          @include textarea-reset;
+          @include root_idea;
+        }
       }
     }
   }
+
 }
