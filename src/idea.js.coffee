@@ -12,7 +12,7 @@ Utils =
 
 
 class Idea
-  constructor: (@text)->
+  constructor: (@text, @mindmap)->
     # STATES = ['common', 'editing_text', 'active']
     @init_fsm()
     @id = Utils.generate_id()
@@ -28,6 +28,8 @@ class Idea
 
     # 切换到节点文字编辑状态
     @fsm.onenterediting_text = =>
+      @mindmap.editing_idea = @
+
       @$el.addClass 'editing-text'
       # 计算 textarea 的初始大小
       t_width = @$text.width()
@@ -43,7 +45,10 @@ class Idea
       .select()
       .focus()
 
+
     @fsm.onleaveediting_text = =>
+      @mindmap.editing_idea = null
+
       @$el.removeClass 'editing-text'
       @$text_ipter.remove()
 
@@ -51,9 +56,11 @@ class Idea
       @set_text @get_text_ipter_text()
 
     @fsm.onenteractive = =>
+      @mindmap.active_idea = @
       @$el.addClass('active')
 
     @fsm.onleaveeactive = =>
+      @mindmap.active_idea = null
       @$el.removeClass('active')
 
 

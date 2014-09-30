@@ -6,7 +6,7 @@ class Mindmap
 
 
   init: ->
-    @root_idea = new Idea('root')
+    @root_idea = new Idea('root', @)
     @add @root_idea
 
 
@@ -68,11 +68,10 @@ class Mindmap
       # 如果节点已经被选中，则开始编辑文字
       if idea.is_active()
         idea.edit_text()
-        that.editing_idea = idea
 
       # 如果节点未被选中，选中节点
       else
-        that.select(idea)
+        idea.select()
 
     # 节点文字编辑框的键盘响应
     @$el.delegate '.idea textarea.text-ipter', 'keydown', (evt)->
@@ -99,9 +98,15 @@ class Mindmap
       if that.editing_idea
         that.editing_idea.stop_edit_text()
 
-
-  select: (idea)->
-    idea.select()
+    
+    # 全局按键事件
+    jQuery(document).on 'keydown', (evt)=>
+      switch evt.keyCode
+        when 13
+          # 如果当前有选中节点，按下回车时，开始编辑节点文字
+          if @active_idea and @active_idea.is_active()
+            evt.preventDefault()
+            @active_idea.edit_text()
 
 
 jQuery(document).ready ->
