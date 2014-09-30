@@ -21,3 +21,8 @@ mindivy
 - textarea-helper.js <br/>
   https://github.com/Codecademy/textarea-helper <br/>
   帮助计算 textarea 尺寸
+
+
+
+#### run
+ruby -run -e httpd . -p 4000
