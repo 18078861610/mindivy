@@ -10,7 +10,7 @@ class Mindmap
 
 
   init: ->
-    @root_topic = new Topic('root', @)
+    @root_topic = Topic.generate_root @
     @add @root_topic
     return @
 
@@ -137,21 +137,24 @@ jQuery(document).ready ->
   mindmap = new Mindmap jQuery('.mindmap')
   mindmap.init()
 
-  mindmap.add mindmap.root_topic.insert_topic()
-  mindmap.add mindmap.root_topic.insert_topic()
-  mindmap.add mindmap.root_topic.insert_topic()
-  mindmap.add mindmap.root_topic.insert_topic()
-  
-  mindmap.add mindmap.root_topic.children[0].insert_topic()
-  mindmap.add mindmap.root_topic.children[0].insert_topic()
+  mindmap.root_topic
+    .insert_topic()
+    .insert_topic()
+    .insert_topic()
+    .insert_topic()
 
-  mindmap.add mindmap.root_topic.children[2].insert_topic()
-  mindmap.add mindmap.root_topic.children[2].insert_topic()
-  mindmap.add mindmap.root_topic.children[2].insert_topic()
+  mindmap.root_topic.children[0]
+    .insert_topic()
+    .insert_topic()
 
-  mindmap.add mindmap.root_topic.children[2].children[2].insert_topic()
-  mindmap.add mindmap.root_topic.children[2].children[2].insert_topic()
+  mindmap.root_topic.children[2]
+    .insert_topic()
+    .insert_topic()
+    .insert_topic()
 
+  mindmap.root_topic.children[2].children[2]
+    .insert_topic()
+    .insert_topic()
 
   mindmap.render()
 

@@ -98,12 +98,22 @@ class TextInputer
 
 
 class Topic
+  @ROOT_TOPIC_TEXT : 'Central Topic'
+  @LV1_TOPIC_TEXT  : 'Main Topic'
+  @LV2_TOPIC_TEXT  : 'Subtopic'
+
+  @STATES: ['common', 'active', 'editing']
+
+  # 创建根节点
+  @generate_root: (mindmap)->
+    root = new Topic @ROOT_TOPIC_TEXT, mindmap
+    root.depth = 0
+    return root
+
   constructor: (@text, @mindmap)->
-    # STATES = ['common', 'editing_text', 'active']
     @init_fsm()
     @id = Utils.generate_id()
     @children = []
-
   
   init_fsm: ->
     @fsm = StateMachine.create
@@ -201,11 +211,21 @@ class Topic
         top: top
 
 
-  # 增加一个新的子节点
+  # 在当前节点增加一个新的子节点
   insert_topic: ->
-    child_topic = new Topic 'new topic', @mindmap
+    console.log @depth
+
+    if @depth is 0
+      text = Topic.LV1_TOPIC_TEXT
+    else
+      text = Topic.LV2_TOPIC_TEXT
+
+    child_topic = new Topic text, @mindmap
+    child_topic.depth = @depth + 1
+
     @children.push child_topic
-    child_topic
+    @mindmap.add child_topic
+    return @
 
 
   # 处理节点点击事件
