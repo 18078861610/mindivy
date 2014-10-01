@@ -10,6 +10,41 @@ Utils =
 
     return re
 
+
+class TextInputer
+  constructor: (@idea)->
+    @$idea_text = @idea.$text
+
+  render: ->
+    @$textarea = jQuery '<textarea>'
+      .addClass 'text-ipter'
+      .val @idea.text
+      .appendTo @idea.$el
+      .select()
+      .focus()
+    @_copy_text_size()
+    return @
+
+  # 获取 textarea 中的值，并进行必要的转换
+  text: ->
+    # 把末尾的换行符添加一个空格，以便于 pre 自适应高度
+    @$textarea.val().replace /\n$/, "\n "
+
+  destroy: ->
+    @$textarea.remove()
+
+  _adjust_text_ipter_size: ->
+    setTimeout =>
+      @$idea_text.text @text()
+      @_copy_text_size()
+
+  # 将 text pre dom 的宽高复制给 textarea
+  _copy_text_size: ->
+    @$textarea.css
+      'width':  @$idea_text.width()
+      'height': @$idea_text.height()
+
+
 class Idea
   constructor: (@text, @mindmap)->
     # STATES = ['common', 'editing_text', 'active']
@@ -47,29 +82,16 @@ class Idea
       @mindmap.editing_idea = @
       @$el.addClass 'editing'
 
-      # 计算 textarea 的初始大小
-      t_width  = @$text.width()
-      t_height = @$text.height()
-
-      @$text_ipter = jQuery '<textarea>'
-        .addClass 'text-ipter'
-        .val @text.replace /<br\/>/g, "\n"
-        .css
-          'width': t_width
-          'height': t_height
-      .appendTo @$el
-      .select()
-      .focus()
+      @text_ipter = new TextInputer(@).render()
 
 
     @fsm.onleaveediting = =>
       @mindmap.editing_idea = null
       @$el.removeClass 'editing'
 
-      @$text_ipter.remove()
-
-      # 获取 textarea 中的文字，写入节点 dom
-      @set_text @get_text_ipter_text()
+      @set_text @text_ipter.text()
+      @text_ipter.destroy()
+      delete @text_ipter
 
 
   # 设置节点文字
@@ -78,24 +100,10 @@ class Idea
     @text = text
 
 
-  # 在节点编辑状态下时获取 textarea 中的文本
-  get_text_ipter_text: ->
-    if @fsm.is 'editing'
-      return @$text_ipter.val().replace /\n$/, "\n "
-
-
    # 输入文字的同时动态调整 textarea 的大小
   adjust_text_ipter_size: ->
-    setTimeout =>
-      text = @get_text_ipter_text()
-      @$text.text text
+    @text_ipter._adjust_text_ipter_size()
 
-      width = @$text.width()
-      height = @$text.height()
-
-      @$text_ipter.css
-        'width': width
-        'height': height
 
   render: ->
     # 当前节点 dom
