@@ -44,6 +44,23 @@ class TextInputer
       'width':  @$idea_text.width()
       'height': @$idea_text.height()
 
+  # 响应键盘事件
+  # 为了执行效率和节约内存，事件绑定使用全局的 delegate
+  handle_keydown: (evt)->
+    # 停止冒泡，防止触发全局快捷键
+    evt.stopPropagation()
+    
+    # 调整 textarea 大小
+    @_adjust_text_ipter_size()
+
+    if evt.keyCode is 13 and not evt.shiftKey
+      # 按下回车时，结束编辑，保存当前文字，阻止原始的回车事件
+      evt.preventDefault()
+      @idea.fsm.stop_edit()
+    else
+      # 按下 shift + 回车时，换行
+      # do nothing 执行 textarea 原始事件
+
 
 class Idea
   constructor: (@text, @mindmap)->
@@ -167,9 +184,6 @@ class Idea
   # 处理空格按下事件
   handle_space_keypress: ->
     @fsm.start_edit() if @fsm.can 'start_edit'
-
-  handle_enter_keypress: ->
-    @fsm.stop_edit() if @fsm.can 'stop_edit'
 
 
 window.Idea = Idea

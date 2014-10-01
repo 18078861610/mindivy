@@ -121,24 +121,8 @@ class Mindmap
 
 
     # 节点文字编辑框的键盘响应
-    @$el.delegate '.idea textarea.text-ipter', 'keydown', (evt)->
-      # 停止冒泡，防止触发全局快捷键
-      evt.stopPropagation()
-      idea = that.get jQuery(this).closest('.idea').data('id')
-
-      switch evt.keyCode
-        when 13
-          if not evt.shiftKey
-            # 按下回车时，结束编辑，保存当前文字，阻止原始的回车事件
-            evt.preventDefault()
-            idea.handle_enter_keypress()
-          else 
-            # 按下 shift + 回车时，换行
-            # do nothing 执行 textarea 原始事件
-            idea.adjust_text_ipter_size()
-        else
-          idea.adjust_text_ipter_size()
-              
+    @$el.delegate '.idea textarea.text-ipter', 'keydown', (evt)=>
+      @active_idea.text_ipter.handle_keydown(evt) if @active_idea
 
     
     # 全局按键事件

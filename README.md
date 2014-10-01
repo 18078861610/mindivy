@@ -18,7 +18,7 @@ mindivy
 
 - http://code.jquery.com/jquery-2.1.1.min.js
 
-- textarea-helper.js <br/>
+- textarea-helper.js （目前好像没有用上）<br/>
   https://github.com/Codecademy/textarea-helper <br/>
   帮助计算 textarea 尺寸
 
