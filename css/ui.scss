@@ -96,18 +96,18 @@ body.editor {
 
 
       &.editing {
-        background-color: $topic-editing-text-bg;
         .text {
-          position:absolute;
           pointer-events:none;
           opacity:0;
         }
+
         textarea.text-ipter {
           @include textarea-reset;
           @include topic-text;
+          position: absolute;
+          background: $topic-editing-text-bg;
         }
       }
     }
   }
-
 }

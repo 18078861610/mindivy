@@ -72,22 +72,21 @@ body.editor {
         font-size: 16px;
         overflow: hidden;
         padding: 0px 5px; }
-      .mindmap .topics-area .topic.editing {
-        background-color: #eeeeee; }
-        .mindmap .topics-area .topic.editing .text {
-          position: absolute;
-          pointer-events: none;
-          opacity: 0; }
-        .mindmap .topics-area .topic.editing textarea.text-ipter {
-          resize: none;
-          border: 0 none;
-          padding: 0;
-          margin: 0;
-          background: transparent;
-          outline: none;
-          white-space: nowrap;
-          min-height: 24px;
-          line-height: 24px;
-          font-size: 16px;
-          overflow: hidden;
-          padding: 0px 5px; }
+      .mindmap .topics-area .topic.editing .text {
+        pointer-events: none;
+        opacity: 0; }
+      .mindmap .topics-area .topic.editing textarea.text-ipter {
+        resize: none;
+        border: 0 none;
+        padding: 0;
+        margin: 0;
+        background: transparent;
+        outline: none;
+        white-space: nowrap;
+        min-height: 24px;
+        line-height: 24px;
+        font-size: 16px;
+        overflow: hidden;
+        padding: 0px 5px;
+        position: absolute;
+        background: #eeeeee; }

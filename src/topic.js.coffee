@@ -16,12 +16,22 @@ class TextInputer
     @$topic_text = @topic.$text
 
   render: ->
+    # 复制一个 text dom 用来计算高度
+    @$text_measure = @$topic_text.clone()
+      .css 'position', 'absolute'
+      .appendTo @topic.$el
+
+    # textarea 左下角固定
     @$textarea = jQuery '<textarea>'
+      .css
+        'left': 0
+        'bottom': 0
       .addClass 'text-ipter'
       .val @topic.text
       .appendTo @topic.$el
       .select()
       .focus()
+
     @_copy_text_size()
     return @
 
@@ -31,18 +41,21 @@ class TextInputer
     @$textarea.val().replace /\n$/, "\n "
 
   destroy: ->
+    @$text_measure.remove()
     @$textarea.remove()
 
   _adjust_text_ipter_size: ->
     setTimeout =>
-      @$topic_text.text @text()
+      @$text_measure.text @text()
       @_copy_text_size()
 
-  # 将 text pre dom 的宽高复制给 textarea
+  # 将 text pre dom 的宽高复制给 textarea 和它的外框容器
   _copy_text_size: ->
+    [w, h] = [@$text_measure.width(), @$text_measure.height()]
+
     @$textarea.css
-      'width':  @$topic_text.width()
-      'height': @$topic_text.height()
+      'width':  w
+      'height': h
 
   # 响应键盘事件
   # 为了执行效率和节约内存，事件绑定使用全局的 delegate
@@ -109,6 +122,8 @@ class Topic
       @set_text @text_ipter.text()
       @text_ipter.destroy()
       delete @text_ipter
+
+      @mindmap.layout()
 
 
   # 设置节点文字
