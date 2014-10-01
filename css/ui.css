@@ -1,11 +1,11 @@
 @charset "UTF-8";
 body.editor {
   background-color: #f1f1f1;
-  font-family: arial, "微软雅黑";
+  font-family: "Segoe UI", "Helvetica Neue", "Helvetica", "Arial", "sans-serif", "微软雅黑";
   font-size: 14px;
   color: #333; }
   body.editor textarea, body.editor pre, body.editor code {
-    font-family: arial, "微软雅黑";
+    font-family: "Segoe UI", "Helvetica Neue", "Helvetica", "Arial", "sans-serif", "微软雅黑";
     margin: 0; }
   body.editor a {
     text-decoration: none; }
@@ -71,22 +71,30 @@ body.editor {
         line-height: 24px;
         font-size: 16px;
         overflow: hidden;
-        padding: 0px 5px; }
+        padding: 0px 5px;
+        font-weight: bold;
+        color: rgba(0, 0, 0, 0.7); }
       .mindmap .topics-area .topic.editing .text {
         pointer-events: none;
         opacity: 0; }
-      .mindmap .topics-area .topic.editing textarea.text-ipter {
-        resize: none;
-        border: 0 none;
-        padding: 0;
-        margin: 0;
-        background: transparent;
-        outline: none;
-        white-space: nowrap;
-        min-height: 24px;
-        line-height: 24px;
-        font-size: 16px;
-        overflow: hidden;
-        padding: 0px 5px;
+      .mindmap .topics-area .topic.editing .text-ipter-box {
         position: absolute;
-        background: #eeeeee; }
+        background: #eeeeee;
+        padding-right: 10px; }
+        .mindmap .topics-area .topic.editing .text-ipter-box textarea.text-ipter {
+          resize: none;
+          border: 0 none;
+          padding: 0;
+          margin: 0;
+          background: transparent;
+          outline: none;
+          white-space: nowrap;
+          min-height: 24px;
+          line-height: 24px;
+          font-size: 16px;
+          overflow: hidden;
+          padding: 0px 5px;
+          font-weight: bold;
+          color: rgba(0, 0, 0, 0.7);
+          position: absolute;
+          padding-right: 100px; }

@@ -7,7 +7,7 @@ $topic-editing-text-bg: #eee;
 
 body.editor {
   background-color: #f1f1f1;
-  $ff: arial, "微软雅黑";
+  $ff: "Segoe UI", "Helvetica Neue", "Helvetica", "Arial", "sans-serif", "微软雅黑";
 
   font-family: $ff;
   font-size: 14px;
@@ -37,6 +37,8 @@ body.editor {
   font-size:16px;
   overflow:hidden;
   padding:0px 5px;
+  font-weight: bold;
+  color:rgba(black, 0.7);
 }
 
 .mindmap .ops {
@@ -101,11 +103,17 @@ body.editor {
           opacity:0;
         }
 
-        textarea.text-ipter {
-          @include textarea-reset;
-          @include topic-text;
+        .text-ipter-box {
           position: absolute;
           background: $topic-editing-text-bg;
+          padding-right: 10px;
+
+          textarea.text-ipter {
+            @include textarea-reset;
+            @include topic-text;
+            position: absolute;
+            padding-right:100px;
+          }
         }
       }
     }

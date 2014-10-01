@@ -16,19 +16,29 @@ class TextInputer
     @$topic_text = @topic.$text
 
   render: ->
-    # 复制一个 text dom 用来计算高度
-    @$text_measure = @$topic_text.clone()
-      .css 'position', 'absolute'
-      .appendTo @topic.$el
-
-    # textarea 左下角固定
-    @$textarea = jQuery '<textarea>'
+    # 此区域用来给 textarea 提供背景色
+    @$textarea_box = jQuery '<div>'
+      .addClass 'text-ipter-box'
       .css
         'left': 0
         'bottom': 0
-      .addClass 'text-ipter'
-      .val @topic.text
       .appendTo @topic.$el
+
+    # 复制一个 text dom 用来计算高度
+    @$text_measure = @$topic_text.clone()
+      .css 
+        'position': 'absolute'
+        'display': 'none'
+      .appendTo @$textarea_box
+
+    # textarea 左下角固定
+    @$textarea = jQuery '<textarea>'
+      .addClass 'text-ipter'
+      .css
+        'left': 0
+        'bottom': 0
+      .val @topic.text
+      .appendTo @$textarea_box
       .select()
       .focus()
 
@@ -41,8 +51,7 @@ class TextInputer
     @$textarea.val().replace /\n$/, "\n "
 
   destroy: ->
-    @$text_measure.remove()
-    @$textarea.remove()
+    @$textarea_box.remove()
 
   _adjust_text_ipter_size: ->
     setTimeout =>
@@ -52,6 +61,19 @@ class TextInputer
   # 将 text pre dom 的宽高复制给 textarea 和它的外框容器
   _copy_text_size: ->
     [w, h] = [@$text_measure.width(), @$text_measure.height()]
+
+    # 记录初始宽高值，使得编辑节点内容时，编辑框的宽高不会小于初始值
+    # 目前不确定是否需要这个体验特性，先注释掉
+    # if not @$textarea_box.data 'origin-width'
+    #   @$textarea_box.data 'origin-width', w
+    #   @$textarea_box.data 'origin-height', h
+    # else
+    #   w = Math.max w, @$textarea_box.data 'origin-width'
+    #   h = Math.max h, @$textarea_box.data 'origin-height'
+
+    @$textarea_box.css
+      'width':  w
+      'height': h
 
     @$textarea.css
       'width':  w
