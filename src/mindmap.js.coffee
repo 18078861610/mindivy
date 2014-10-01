@@ -6,42 +6,41 @@ class BasicLayout
   go: ->
     root_topic = @mindmap.root_topic
 
-    # # 第一次遍历：求出所有节点的区域高度
-    # # 区域高度的含义是，容纳节点及其所有子孙节点的区域的高度
-    # @_layout_r1 root_topic
+    # 第一次遍历：深度优先遍历
+    # 渲染所有节点并且计算各个节点的布局数据
+    @_layout_r1 root_topic
 
-    # 第二次遍历：定位所有节点
+    # 第二次遍历：宽度优先遍历
+    # 定位所有节点
     root_topic.pos 0, 0
-    @_layout_r root_topic
+    @_layout_r2 root_topic
 
-  _layout_r: (topic)->
+  _layout_r1: (topic)->
+    layout_children_height = 0
+
+    for child in topic.children
+      @_layout_r1 child
+      layout_children_height += child.layout_area_height
+    layout_children_height += @IDEA_Y_PADDING * (topic.children.length - 1)
+    
+    topic.layout_children_height = layout_children_height
+    topic.render() # 生成 dom，同时计算 topic.layout_height
+    topic.layout_area_height = Math.max topic.layout_height, layout_children_height
+
+
+  _layout_r2: (topic)->
     mid_y = topic.layout_top + topic.layout_height / 2.0
     children_top = mid_y - topic.layout_children_height / 2.0
     children_left = topic.layout_left + topic.size().width + @IDEA_X_PADDING
 
     t = children_top
-    for child_topic in topic.children
+    for child in topic.children
       left = children_left
-      top = t + (child_topic.layout_area_height - child_topic.layout_height) / 2.0
-      child_topic.pos left, top
-      @_layout_r child_topic
+      top  = t + (child.layout_area_height - child.layout_height) / 2.0
+      child.pos left, top
+      @_layout_r2 child
 
-      t += child_topic.layout_area_height + @IDEA_Y_PADDING
-
-  calc_area_height: (topic)->
-    topic.layout_children_height = 0
-
-    for child_topic in topic.children
-      # 如果还有没有初始化 dom 的子节点，则返回
-      # return if not child_topic.rendered
-      topic.layout_children_height += child_topic.layout_area_height
-
-    console.log topic.layout_children_height
-
-    topic.layout_children_height += @IDEA_X_PADDING * (topic.children.length - 1)
-    topic.layout_area_height = Math.max topic.layout_height, topic.layout_children_height
-
-    console.log topic.layout_area_height
+      t += child.layout_area_height + @IDEA_Y_PADDING
 
 
 class Mindmap
@@ -55,16 +54,8 @@ class Mindmap
     @root_topic = Topic.generate_root @
     return @
 
-  # 每次增加节点后调用此方法
-  # 调用此方法之前新增节点的 dom 不会被创建
-  # 可以在批量创建节点后调用此方法
-  render: ->
-    Topic.each (id, topic)=>
-      topic.render()
-    @layout()
-    return @
-
   # 重新对所有节点布局
+  # 增加或修改节点后调用此方法
   layout: ->
     @basic_layout.go()
 
@@ -79,8 +70,8 @@ class Mindmap
       console.log '没有选中任何节点，无法增加子节点'
       return
 
-    @add @active_topic.insert_topic()
-    @render()
+    @active_topic.insert_topic()
+    @layout()
 
 
   get_editor_size: ->
@@ -145,7 +136,7 @@ jQuery(document).ready ->
     .insert_topic()
     .insert_topic()
 
-  mindmap.render()
+  mindmap.layout()
 
 
 

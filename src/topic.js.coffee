@@ -213,15 +213,6 @@ class Topic
     @layout_width  = @$el.outerWidth()
     @layout_height = @$el.outerHeight()
 
-    # 一路往前查找祖先节点，计算每个祖先节点的区域高度
-    topic = @
-    while topic
-      # 所有子节点的区域高度之和 layout_children_height
-      # 当前节点的高度 layout_height
-      # 当前节点的区域高度 layout_area_height
-      @mindmap.basic_layout.calc_area_height topic
-      topic = topic.parent
-
 
   # 计算节点的尺寸，便于其他计算使用
   size: ->
