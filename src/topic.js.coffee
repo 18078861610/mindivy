@@ -12,14 +12,14 @@ Utils =
 
 
 class TextInputer
-  constructor: (@idea)->
-    @$idea_text = @idea.$text
+  constructor: (@topic)->
+    @$topic_text = @topic.$text
 
   render: ->
     @$textarea = jQuery '<textarea>'
       .addClass 'text-ipter'
-      .val @idea.text
-      .appendTo @idea.$el
+      .val @topic.text
+      .appendTo @topic.$el
       .select()
       .focus()
     @_copy_text_size()
@@ -35,14 +35,14 @@ class TextInputer
 
   _adjust_text_ipter_size: ->
     setTimeout =>
-      @$idea_text.text @text()
+      @$topic_text.text @text()
       @_copy_text_size()
 
   # 将 text pre dom 的宽高复制给 textarea
   _copy_text_size: ->
     @$textarea.css
-      'width':  @$idea_text.width()
-      'height': @$idea_text.height()
+      'width':  @$topic_text.width()
+      'height': @$topic_text.height()
 
   # 响应键盘事件
   # 为了执行效率和节约内存，事件绑定使用全局的 delegate
@@ -56,13 +56,13 @@ class TextInputer
     if evt.keyCode is 13 and not evt.shiftKey
       # 按下回车时，结束编辑，保存当前文字，阻止原始的回车事件
       evt.preventDefault()
-      @idea.fsm.stop_edit()
+      @topic.fsm.stop_edit()
     else
       # 按下 shift + 回车时，换行
       # do nothing 执行 textarea 原始事件
 
 
-class Idea
+class Topic
   constructor: (@text, @mindmap)->
     # STATES = ['common', 'editing_text', 'active']
     @init_fsm()
@@ -83,27 +83,27 @@ class Idea
 
     # 切换与退出选中状态
     @fsm.onbeforeselect = =>
-      if @mindmap.active_idea and @mindmap.active_idea != @
-        @mindmap.active_idea.handle_click_out()
+      if @mindmap.active_topic and @mindmap.active_topic != @
+        @mindmap.active_topic.handle_click_out()
 
-      @mindmap.active_idea = @
+      @mindmap.active_topic = @
       @$el.addClass('active')
 
     @fsm.onbeforeunselect = =>
-      @mindmap.active_idea = null
+      @mindmap.active_topic = null
       @$el.removeClass('active')
 
 
     # 切换与退出编辑状态
     @fsm.onenterediting = =>
-      @mindmap.editing_idea = @
+      @mindmap.editing_topic = @
       @$el.addClass 'editing'
 
       @text_ipter = new TextInputer(@).render()
 
 
     @fsm.onleaveediting = =>
-      @mindmap.editing_idea = null
+      @mindmap.editing_topic = null
       @$el.removeClass 'editing'
 
       @set_text @text_ipter.text()
@@ -125,7 +125,7 @@ class Idea
   render: ->
     # 当前节点 dom
     @$el = jQuery '<div>'
-      .addClass 'idea'
+      .addClass 'topic'
       .data 'id', @id
 
     # 节点上的文字
@@ -165,10 +165,10 @@ class Idea
 
 
   # 增加一个新的子节点
-  insert_idea: ->
-    child_idea = new Idea 'new idea', @mindmap
-    @children.push child_idea
-    child_idea
+  insert_topic: ->
+    child_topic = new Topic 'new topic', @mindmap
+    @children.push child_topic
+    child_topic
 
 
   # 处理节点点击事件
@@ -186,5 +186,5 @@ class Idea
     @fsm.start_edit() if @fsm.can 'start_edit'
 
 
-window.Idea = Idea
+window.Topic = Topic
 window.Utils = Utils

@@ -37,7 +37,8 @@ body.editor {
   background-color: #FFF;
   box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
   border-radius: 4px;
-  -webkit-user-select: none; }
+  -webkit-user-select: none;
+  overflow: hidden; }
   .mindmap .bottom-area {
     position: absolute;
     top: 0;
@@ -45,11 +46,11 @@ body.editor {
     right: 0;
     bottom: 0;
     z-index: -1; }
-  .mindmap .ideas-area {
+  .mindmap .topics-area {
     position: absolute;
     top: 50%;
     left: 50%; }
-    .mindmap .ideas-area .idea {
+    .mindmap .topics-area .topic {
       position: absolute;
       border-radius: 4px;
       cursor: pointer;
@@ -61,23 +62,23 @@ body.editor {
       -ms-transition: all 0.3s ease-out;
       -o-transition: all 0.3s ease-out;
       transition: all 0.3s ease-out; }
-      .mindmap .ideas-area .idea:hover {
+      .mindmap .topics-area .topic:hover {
         border-color: #74c6f8; }
-      .mindmap .ideas-area .idea.active {
+      .mindmap .topics-area .topic.active {
         border-color: rgba(0, 0, 0, 0.5); }
-      .mindmap .ideas-area .idea .text {
+      .mindmap .topics-area .topic .text {
         min-height: 24px;
         line-height: 24px;
         font-size: 16px;
         overflow: hidden;
         padding: 0px 5px; }
-      .mindmap .ideas-area .idea.editing {
+      .mindmap .topics-area .topic.editing {
         background-color: #eeeeee; }
-        .mindmap .ideas-area .idea.editing .text {
+        .mindmap .topics-area .topic.editing .text {
           position: absolute;
           pointer-events: none;
           opacity: 0; }
-        .mindmap .ideas-area .idea.editing textarea.text-ipter {
+        .mindmap .topics-area .topic.editing textarea.text-ipter {
           resize: none;
           border: 0 none;
           padding: 0;

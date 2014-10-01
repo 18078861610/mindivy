@@ -1,7 +1,7 @@
-$idea-bg-common: lighten(#44B2F5, 25%);
-$idea-hover-border: lighten(#44B2F5, 10%);
-$idea-active-border: rgba(black, 0.5);
-$idea-editing-text-bg: #eee;
+$topic-bg-common: lighten(#44B2F5, 25%);
+$topic-hover-border: lighten(#44B2F5, 10%);
+$topic-active-border: rgba(black, 0.5);
+$topic-editing-text-bg: #eee;
 
 @import "mixin";
 
@@ -31,7 +31,7 @@ body.editor {
   white-space:nowrap;
 }
 
-@mixin idea-text {
+@mixin topic-text {
   min-height:24px;
   line-height:24px;
   font-size:16px;
@@ -65,6 +65,7 @@ body.editor {
   box-shadow:1px 1px 2px rgba(black, 0.4);
   border-radius:4px;
   -webkit-user-select: none;
+  overflow:hidden;
 
   .bottom-area {
     position:absolute;
@@ -72,30 +73,30 @@ body.editor {
     z-index:-1;
   }
 
-  .ideas-area {
+  .topics-area {
     position:absolute;
     top:50%;
     left:50%;
 
-    .idea {
+    .topic {
       position:absolute;
       border-radius:4px;
       cursor: pointer;
       font-size: 0;
-      background-color:$idea-bg-common;
+      background-color:$topic-bg-common;
       border:solid 3px transparent;
       @include transition(all .3s ease-out);
 
 
-      &:hover  { border-color: $idea-hover-border;}
-      &.active { border-color: $idea-active-border;}
+      &:hover  { border-color: $topic-hover-border;}
+      &.active { border-color: $topic-active-border;}
       
 
-      .text {@include idea-text;}
+      .text {@include topic-text;}
 
 
       &.editing {
-        background-color: $idea-editing-text-bg;
+        background-color: $topic-editing-text-bg;
         .text {
           position:absolute;
           pointer-events:none;
@@ -103,7 +104,7 @@ body.editor {
         }
         textarea.text-ipter {
           @include textarea-reset;
-          @include idea-text;
+          @include topic-text;
         }
       }
     }
