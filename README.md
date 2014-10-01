@@ -8,11 +8,15 @@ mindivy
 
 #### 开发进展
 
-###### 20114.9.30
+###### 2014.9.30
 
 - 完成了基本的节点选择，文字编辑事件处理
 - 完成了基本的节点布局算法
 
+###### 2014.10.1
+
+- 优化了文字编辑时的输入体验
+- 优化了节点布局算法
 
 #### js 库依赖
 
@@ -27,12 +31,6 @@ mindivy
 - http://coffeescript.org/extras/coffee-script.js
 
 - http://code.jquery.com/jquery-2.1.1.min.js
-
-- textarea-helper.js （目前好像没有用上）<br/>
-  https://github.com/Codecademy/textarea-helper <br/>
-  帮助计算 textarea 尺寸
-
-
 
 #### run
 ruby -run -e httpd . -p 4000
