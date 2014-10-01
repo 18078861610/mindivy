@@ -5,8 +5,7 @@ body.editor {
   font-size: 14px;
   color: #333; }
   body.editor textarea, body.editor pre, body.editor code {
-    font-family: arial, "微软雅黑"; }
-  body.editor pre, body.editor code {
+    font-family: arial, "微软雅黑";
     margin: 0; }
   body.editor a {
     text-decoration: none; }
@@ -71,8 +70,7 @@ body.editor {
         line-height: 24px;
         font-size: 16px;
         overflow: hidden;
-        padding: 0px 5px;
-        white-space: nowrap; }
+        padding: 0px 5px; }
       .mindmap .ideas-area .idea.editing {
         background-color: #eeeeee; }
         .mindmap .ideas-area .idea.editing .text {
@@ -86,9 +84,9 @@ body.editor {
           margin: 0;
           background: transparent;
           outline: none;
+          white-space: nowrap;
           min-height: 24px;
           line-height: 24px;
           font-size: 16px;
           overflow: hidden;
-          padding: 0px 5px;
-          white-space: nowrap; }
+          padding: 0px 5px; }

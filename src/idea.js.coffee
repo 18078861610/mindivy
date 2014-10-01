@@ -10,7 +10,6 @@ Utils =
 
     return re
 
-
 class Idea
   constructor: (@text, @mindmap)->
     # STATES = ['common', 'editing_text', 'active']
@@ -75,20 +74,21 @@ class Idea
 
   # 设置节点文字
   set_text: (text)->
-    @$text.html text
+    @$text.text text
     @text = text
 
 
   # 在节点编辑状态下时获取 textarea 中的文本
   get_text_ipter_text: ->
     if @fsm.is 'editing'
-      return @$text_ipter.val().replace /\n/g, '<br/>'
+      return @$text_ipter.val().replace /\n$/, "\n "
+
 
    # 输入文字的同时动态调整 textarea 的大小
   adjust_text_ipter_size: ->
     setTimeout =>
       text = @get_text_ipter_text()
-      @$text.html text
+      @$text.text text
 
       width = @$text.width()
       height = @$text.height()
@@ -104,9 +104,9 @@ class Idea
       .data 'id', @id
 
     # 节点上的文字
-    @$text = jQuery '<div>'
+    @$text = jQuery '<pre>'
       .addClass 'text'
-      .html @text
+      .text @text
       .appendTo @$el
 
     @rendered = true

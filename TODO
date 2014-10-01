@@ -1,0 +1,7 @@
+1. 把 text dom 换成 pre 元素. [OK]
+  1.1 把文本编辑逻辑抽取成单独的类 
+
+
+2. 把 Idea 类名换成 Topic .
+3. 解决 textarea 输入文字过程中的抖动问题 .
+4. 完成 canvas 画线方法 .

@@ -15,15 +15,10 @@ body.editor {
 
   textarea, pre, code {
     font-family: $ff;
-  }
-
-  pre, code {
     margin:0;
   }
 
-  a {
-    text-decoration:none;
-  }
+  a { text-decoration:none; }
 }
 
 
@@ -32,7 +27,16 @@ body.editor {
   border:0 none;
   padding:0;margin:0;
   background:transparent;
-  outline: none;
+  outline:none;
+  white-space:nowrap;
+}
+
+@mixin idea-text {
+  min-height:24px;
+  line-height:24px;
+  font-size:16px;
+  overflow:hidden;
+  padding:0px 5px;
 }
 
 .mindmap .ops {
@@ -52,15 +56,6 @@ body.editor {
       background-color:lighten(#ffcc3f, 20%);
     }
   }
-}
-
-@mixin root_idea {
-  min-height:24px;
-  line-height:24px;
-  font-size:16px;
-  overflow:hidden;
-  padding:0px 5px;
-  white-space: nowrap;
 }
 
 .mindmap {
@@ -96,7 +91,7 @@ body.editor {
       &.active { border-color: $idea-active-border;}
       
 
-      .text {@include root_idea;}
+      .text {@include idea-text;}
 
 
       &.editing {
@@ -108,7 +103,7 @@ body.editor {
         }
         textarea.text-ipter {
           @include textarea-reset;
-          @include root_idea;
+          @include idea-text;
         }
       }
     }
