@@ -1,88 +1,77 @@
-class Mindmap
-  constructor: (@$el)->
+class BasicLayout
+  constructor: (@mindmap)->
     @IDEA_Y_PADDING = 10
     @IDEA_X_PADDING = 30
 
-    @$topics_area = @$el.find('.topics-area')
+  go: ->
+    root_topic = @mindmap.root_topic
 
-    @topics = {}
-    @bind_topics_events()
-
-
-  init: ->
-    @root_topic = Topic.generate_root @
-    @add @root_topic
-    return @
-
-  render: ->
-    for id, topic of @topics
-      @$topics_area.append topic.render() if not topic.rendered
-    @center_to @root_topic
-
-    @layout()
-
-    return @
-
-  # 重新对所有节点布局
-  layout: ->
-    # 第一次遍历：求出所有节点的区域高度
-    # 区域高度的含义是，容纳节点及其所有子孙节点的区域的高度
-    @_layout_r1 @root_topic
-
-    # for id, topic of @topics
-    #   console.log id, topic.area_height
+    # # 第一次遍历：求出所有节点的区域高度
+    # # 区域高度的含义是，容纳节点及其所有子孙节点的区域的高度
+    # @_layout_r1 root_topic
 
     # 第二次遍历：定位所有节点
-    @root_topic.pos 0, 0
-    @_layout_r2 @root_topic
+    root_topic.pos 0, 0
+    @_layout_r root_topic
 
-  _layout_r1: (topic)->
-    topic.children_height = 0
-    for child_topic in topic.children
-      topic.children_height += @_layout_r1 child_topic
-
-    topic.children_height += @IDEA_Y_PADDING * (topic.children.length - 1)
-
-    topic.this_height = topic.size().height
-    topic.area_height = Math.max topic.this_height, topic.children_height
-
-  _layout_r2: (topic)->
-    mid_y = topic.layout_top + topic.this_height / 2.0
-    children_top = mid_y - topic.children_height / 2.0
+  _layout_r: (topic)->
+    mid_y = topic.layout_top + topic.layout_height / 2.0
+    children_top = mid_y - topic.layout_children_height / 2.0
     children_left = topic.layout_left + topic.size().width + @IDEA_X_PADDING
 
     t = children_top
     for child_topic in topic.children
       left = children_left
-      top = t + (child_topic.area_height - child_topic.this_height) / 2.0
+      top = t + (child_topic.layout_area_height - child_topic.layout_height) / 2.0
       child_topic.pos left, top
-      @_layout_r2 child_topic
+      @_layout_r child_topic
 
-      t += child_topic.area_height + @IDEA_Y_PADDING
+      t += child_topic.layout_area_height + @IDEA_Y_PADDING
+
+  calc_area_height: (topic)->
+    topic.layout_children_height = 0
+
+    for child_topic in topic.children
+      # 如果还有没有初始化 dom 的子节点，则返回
+      # return if not child_topic.rendered
+      topic.layout_children_height += child_topic.layout_area_height
+
+    console.log topic.layout_children_height
+
+    topic.layout_children_height += @IDEA_X_PADDING * (topic.children.length - 1)
+    topic.layout_area_height = Math.max topic.layout_height, topic.layout_children_height
+
+    console.log topic.layout_area_height
 
 
-  add: (topic)->
-    @topics[topic.id] = topic
+class Mindmap
+  constructor: (@$el)->
+    @$topics_area = @$el.find('.topics-area')
+    @basic_layout = new BasicLayout @
 
-  get: (topic_id)->
-    return @topics[topic_id]
+    @bind_topics_events()
+
+  init: ->
+    @root_topic = Topic.generate_root @
+    return @
+
+  # 每次增加节点后调用此方法
+  # 调用此方法之前新增节点的 dom 不会被创建
+  # 可以在批量创建节点后调用此方法
+  render: ->
+    Topic.each (id, topic)=>
+      topic.render()
+    @layout()
+    return @
+
+  # 重新对所有节点布局
+  layout: ->
+    @basic_layout.go()
+
 
   # 使得指定的节点在编辑器界面内居中显示
   center_to: (topic, is_animate)->
-    # editor_size = @get_editor_size()
-    # editor_width = editor_size.width
-    # editor_height = editor_size.height
 
-    # topic_size = topic.size()
-    # topic_width = topic_size.width
-    # topic_height = topic_size.height
-
-    # # console.log editor_width, editor_height, topic_width, topic_height
-
-    # topic_left = (editor_width - topic_width) / 2
-    # topic_top  = (editor_height - topic_height) / 2
-
-    # topic.pos(topic_left, topic_top, is_animate)
 
   # 在选择的节点上新增子节点
   insert_topic: ->
@@ -111,7 +100,7 @@ class Mindmap
     # 单击节点
     @$el.delegate '.topic', 'click', (evt)->
       evt.stopPropagation()
-      topic = that.get jQuery(this).data('id')
+      topic = Topic.get jQuery(this).data('id')
       topic.handle_click()
       
       

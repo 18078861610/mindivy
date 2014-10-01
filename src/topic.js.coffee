@@ -14,6 +14,7 @@ Utils =
 class TextInputer
   constructor: (@topic)->
     @$topic_text = @topic.$text
+    @render()
 
   render: ->
     # 此区域用来给 textarea 提供背景色
@@ -98,6 +99,8 @@ class TextInputer
 
 
 class Topic
+  @HASH: {}
+
   @ROOT_TOPIC_TEXT : 'Central Topic'
   @LV1_TOPIC_TEXT  : 'Main Topic'
   @LV2_TOPIC_TEXT  : 'Subtopic'
@@ -108,7 +111,19 @@ class Topic
   @generate_root: (mindmap)->
     root = new Topic @ROOT_TOPIC_TEXT, mindmap
     root.depth = 0
+    @set root
     return root
+
+  # 将指定节点存入 hash
+  @set: (topic)->
+    @HASH[topic.id] = topic
+
+  @get: (id)->
+    @HASH[id]
+
+  @each: (func)->
+    for id, topic of @HASH
+      func(id, topic)
 
   constructor: (@text, @mindmap)->
     @init_fsm()
@@ -144,7 +159,7 @@ class Topic
       @mindmap.editing_topic = @
       @$el.addClass 'editing'
 
-      @text_ipter = new TextInputer(@).render()
+      @text_ipter = new TextInputer(@)
 
 
     @fsm.onleaveediting = =>
@@ -155,6 +170,7 @@ class Topic
       @text_ipter.destroy()
       delete @text_ipter
 
+      @recalc_size()
       @mindmap.layout()
 
 
@@ -169,30 +185,49 @@ class Topic
     @text_ipter._adjust_text_ipter_size()
 
 
+  # 生成节点 dom 只会调用一次
   render: ->
-    # 当前节点 dom
-    @$el = jQuery '<div>'
-      .addClass 'topic'
-      .data 'id', @id
+    if not @rendered
+      @rendered = true
 
-    # 节点上的文字
-    @$text = jQuery '<pre>'
-      .addClass 'text'
-      .text @text
-      .appendTo @$el
+      # 当前节点 dom
+      @$el = jQuery '<div>'
+        .addClass 'topic'
+        .data 'id', @id
 
-    @rendered = true
+      # 节点上的文字
+      @$text = jQuery '<pre>'
+        .addClass 'text'
+        .text @text
+        .appendTo @$el
+
+      @$el.appendTo @mindmap.$topics_area
+
+      @recalc_size()
 
     return @$el
 
+
+  # 重新计算节点布局宽高
+  recalc_size: ->
+    @layout_width  = @$el.outerWidth()
+    @layout_height = @$el.outerHeight()
+
+    # 一路往前查找祖先节点，计算每个祖先节点的区域高度
+    topic = @
+    while topic
+      # 所有子节点的区域高度之和 layout_children_height
+      # 当前节点的高度 layout_height
+      # 当前节点的区域高度 layout_area_height
+      @mindmap.basic_layout.calc_area_height topic
+      topic = topic.parent
+
+
   # 计算节点的尺寸，便于其他计算使用
   size: ->
-    width = @$el.outerWidth()
-    height = @$el.outerHeight()
-
     return {
-      width: width
-      height: height
+      width: @layout_width
+      height: @layout_height
     }
 
   # 将节点定位到编辑器的指定相对位置
@@ -213,8 +248,6 @@ class Topic
 
   # 在当前节点增加一个新的子节点
   insert_topic: ->
-    console.log @depth
-
     if @depth is 0
       text = Topic.LV1_TOPIC_TEXT
     else
@@ -224,7 +257,9 @@ class Topic
     child_topic.depth = @depth + 1
 
     @children.push child_topic
-    @mindmap.add child_topic
+    child_topic.parent = @
+
+    Topic.set child_topic
     return @
 
 
