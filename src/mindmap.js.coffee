@@ -218,10 +218,17 @@ class Mindmap
     
     # 全局按键事件
     jQuery(document).on 'keydown', (evt)=>
+      console.log "keyCode: " + evt.keyCode
       switch evt.keyCode
-        when 32
+        when 32 # spacebar
           evt.preventDefault()
-          @active_topic.handle_space_keypress()
+          @active_topic.handle_space_keydown() if @active_topic
+        when 45 # insert
+          evt.preventDefault()
+          @active_topic.handle_insert_keydown() if @active_topic
+        when 13 # enter
+          evt.preventDefault()
+          @active_topic.handle_enter_keydown() if @active_topic
 
 
 jQuery(document).ready ->

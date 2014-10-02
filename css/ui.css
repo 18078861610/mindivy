@@ -27,6 +27,18 @@ body.editor {
     .mindmap .ops a.op:hover {
       text-decoration: none;
       background-color: #ffe7a5; }
+  .mindmap .ops .keys {
+    float: left;
+    height: 30px;
+    line-height: 30px; }
+    .mindmap .ops .keys span {
+      float: left;
+      height: 30px;
+      line-height: 30px;
+      background-color: #f1f1f1;
+      margin-right: 10px;
+      border-radius: 3px;
+      padding: 0 10px; }
 
 .mindmap {
   position: fixed;
@@ -102,6 +114,18 @@ body.editor {
           color: rgba(0, 0, 0, 0.6);
           position: absolute;
           padding-right: 100px; }
+      .mindmap .topics-area .topic.flash-highlight {
+        background-color: #FFCC3F; }
+    .mindmap .topics-area .topic .float-num {
+      position: absolute;
+      z-index: 2;
+      right: 0;
+      top: -20px;
+      height: 30px;
+      line-height: 30px;
+      color: #009800;
+      font-weight: bold;
+      font-size: 20px; }
     .mindmap .topics-area canvas {
       position: absolute;
       pointer-events: none; }

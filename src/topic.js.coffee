@@ -185,6 +185,29 @@ class Topic
     @text_ipter._adjust_text_ipter_size()
 
 
+  # 闪烁动画
+  flash_animate: ->
+    @$el
+      .addClass 'flash-highlight'
+
+    setTimeout =>
+      @$el.removeClass 'flash-highlight'
+    , 500
+
+
+    # 增加节点时，父节点显示 +1 效果
+    $float_num = jQuery '<div>'
+      .addClass 'float-num'
+      .addClass 'plus'
+      .html '+1'
+      .appendTo @parent.$el
+
+      .animate
+        'top': '-=20'
+        'opacity': '0'
+      , 600, ->
+        $float_num.remove()
+
   # 生成节点 dom 只会调用一次
   render: ->
     if not @rendered
@@ -204,6 +227,9 @@ class Topic
       @$el.appendTo @mindmap.$topics_area
 
       @recalc_size()
+
+      if @flash
+        @flash_animate()
 
     return @$el
 
@@ -238,7 +264,12 @@ class Topic
 
 
   # 在当前节点增加一个新的子节点
-  insert_topic: ->
+  # options
+  #   flash: 新增节点时是否有闪烁效果
+  insert_topic: (options)->
+    options ||= {}
+    flash = options.flash
+
     if @depth is 0
       text = Topic.LV1_TOPIC_TEXT
     else
@@ -246,6 +277,7 @@ class Topic
 
     child_topic = new Topic text, @mindmap
     child_topic.depth = @depth + 1
+    child_topic.flash = flash
 
     @children.push child_topic
     child_topic.parent = @
@@ -265,8 +297,27 @@ class Topic
     @fsm.unselect() if @fsm.can 'unselect'
 
   # 处理空格按下事件
-  handle_space_keypress: ->
+  handle_space_keydown: ->
     @fsm.start_edit() if @fsm.can 'start_edit'
+
+  # 处理 insert 按键按下事件
+  handle_insert_keydown: ->
+    return if not @fsm.is 'active'
+
+    @insert_topic {flash:true}
+    @mindmap.layout()
+
+  # 处理回车键按下事件
+  handle_enter_keydown: ->
+    return if not @fsm.is 'active'
+
+    if @is_root()
+      @insert_topic {flash:true}
+      @mindmap.layout()
+      return
+
+  is_root: ->
+    return @depth is 0
 
   # 判断该子节点是否有子节点
   has_children: ->

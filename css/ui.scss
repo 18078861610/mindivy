@@ -58,6 +58,18 @@ body.editor {
       background-color:lighten(#ffcc3f, 20%);
     }
   }
+  .keys {
+    float:left;
+    height: 30px;line-height: 30px;
+    span {
+      float:left;
+      height: 30px;line-height: 30px;
+      background-color: #f1f1f1;
+      margin-right: 10px;
+      border-radius:3px;
+      padding:0 10px;
+    }
+  }
 }
 
 .mindmap {
@@ -119,6 +131,20 @@ body.editor {
           }
         }
       }
+
+      &.flash-highlight {
+        background-color: #FFCC3F;
+      }
+    }
+
+    .topic .float-num {
+      position:absolute;
+      z-index:2;
+      right:0;top:-20px;
+      height:30px;line-height:30px;
+      color:#009800;
+      font-weight:bold;
+      font-size:20px;
     }
 
     canvas {
