@@ -106,7 +106,7 @@ body.editor {
 
 
       &:hover  { border-color: $topic-hover-border;}
-      &.active { border-color: $topic-active-border;}
+      &.active { border-color: $topic-active-border; background:#4CC85E;}
       
 
       .text {@include topic-text;}

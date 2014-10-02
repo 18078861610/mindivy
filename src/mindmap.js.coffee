@@ -232,6 +232,18 @@ class Mindmap
         when 46 # delete
           evt.preventDefault()
           @active_topic.handle_delete_keydown() if @active_topic
+        when 38 # ↑
+          evt.preventDefault()
+          @active_topic.handle_arrow_keydown('up')
+        when 40 # ↓
+          evt.preventDefault()
+          @active_topic.handle_arrow_keydown('down')
+        when 37 # ←
+          evt.preventDefault()
+          @active_topic.handle_arrow_keydown('left')
+        when 39 # →
+          evt.preventDefault()
+          @active_topic.handle_arrow_keydown('right')
 
 
 jQuery(document).ready ->
@@ -249,6 +261,11 @@ jQuery(document).ready ->
     .insert_topic()
 
   mindmap.root_topic.children[2]
+    .insert_topic()
+    .insert_topic()
+    .insert_topic()
+
+  mindmap.root_topic.children[2].children[1]
     .insert_topic()
     .insert_topic()
     .insert_topic()

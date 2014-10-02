@@ -399,6 +399,35 @@ class Topic
       @delete_topic()
       @mindmap.layout()
 
+  handle_arrow_keydown: (direction)->
+    switch direction
+      when 'up'
+        return if @is_root()
+        if @prev()
+          @prev().fsm.select()
+        else
+          if @parent.prev() and @parent.prev().children.length
+            children = @parent.prev().children
+            children[children.length - 1].fsm.select()
+
+      when 'down'
+        return if @is_root()
+        if @next()
+          @next().fsm.select()
+        else
+          if @parent.next() and @parent.next().children.length
+            children = @parent.next().children
+            children[0].fsm.select()
+
+      when 'left'
+        @parent.fsm.select() if @parent
+
+      when 'right'
+        if length = @children.length
+          idx = ~~(length / 2)
+          if child = @children[idx]
+            child.fsm.select()
+
 
   is_root: ->
     return @depth is 0
@@ -417,6 +446,7 @@ class Topic
     return null if @is_root()
     idx = @parent.children.indexOf @
     return @parent.children[idx - 1]
+
 
 
 window.Topic = Topic
