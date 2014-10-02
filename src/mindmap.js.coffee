@@ -48,7 +48,7 @@ class BasicLayout
 
 
   draw_lines: ->
-    console.log '开始画线'
+    # console.log '开始画线'
     root_topic = @mindmap.root_topic
     @_d_r root_topic
 
@@ -254,6 +254,12 @@ jQuery(document).ready ->
     .insert_topic()
 
   mindmap.root_topic.children[2].children[2]
+    .insert_topic()
+    .insert_topic()
+    .insert_topic()
+    .insert_topic()
+    .insert_topic()
+    .insert_topic()
     .insert_topic()
     .insert_topic()
 

@@ -207,6 +207,7 @@ class Topic
       , 600, ->
         $float_num.remove()
 
+
   # 生成节点 dom 只会调用一次
   render: ->
     if not @rendered
@@ -296,6 +297,18 @@ class Topic
 
   # 删除当前节点以及所有子节点
   delete_topic: ->
+    # 删除节点后，重新定位当前的 active_topic
+    # 如果有后续同级节点，选中后续同级节点
+    # 如果有前置同级节点，选中前置同级节点
+    if @next()
+      console.log @next()
+      @next().fsm.select()
+    else if @prev()
+      @prev().fsm.select()
+    else
+      @parent.fsm.select()
+
+
     # 删除 dom
     # 遍历，清除所有子节点 dom
     @_delete_r @
@@ -326,8 +339,9 @@ class Topic
       , 600, =>
         $float_num.remove()
         $pel.css 'z-index', ''
-
+    
     @parent = null
+
 
   _delete_r: (topic)->
     for child in topic.children
@@ -342,14 +356,17 @@ class Topic
     return @fsm.select() if @fsm.can 'select'
     return @fsm.start_edit() if @fsm.can 'start_edit'
 
+
   # 处理节点外点击事件
   handle_click_out: ->
     @fsm.stop_edit() if @fsm.can 'stop_edit'
     @fsm.unselect() if @fsm.can 'unselect'
 
+
   # 处理空格按下事件
   handle_space_keydown: ->
     @fsm.start_edit() if @fsm.can 'start_edit'
+
 
   # 处理 insert 按键按下事件
   handle_insert_keydown: ->
@@ -389,6 +406,17 @@ class Topic
   # 判断该子节点是否有子节点
   has_children: ->
     !!@children.length
+
+  # 获取当前节点的下一个同级节点，如果没有的话，返回 null
+  next: ->
+    return null if @is_root()
+    idx = @parent.children.indexOf @
+    return @parent.children[idx + 1]
+
+  prev: ->
+    return null if @is_root()
+    idx = @parent.children.indexOf @
+    return @parent.children[idx - 1]
 
 
 window.Topic = Topic
