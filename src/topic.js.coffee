@@ -268,6 +268,10 @@ class Topic
   handle_space_keypress: ->
     @fsm.start_edit() if @fsm.can 'start_edit'
 
+  # 判断该子节点是否有子节点
+  has_children: ->
+    !!@children.length
+
 
 window.Topic = Topic
 window.Utils = Utils

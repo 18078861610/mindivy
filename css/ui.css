@@ -51,6 +51,10 @@ body.editor {
     top: 50%;
     left: 50%; }
     .mindmap .topics-area .topic {
+      z-index: 1; }
+    .mindmap .topics-area canvas {
+      z-index: 0; }
+    .mindmap .topics-area .topic {
       position: absolute;
       border-radius: 4px;
       cursor: pointer;
@@ -98,3 +102,6 @@ body.editor {
           color: rgba(0, 0, 0, 0.6);
           position: absolute;
           padding-right: 100px; }
+    .mindmap .topics-area canvas {
+      position: absolute;
+      pointer-events: none; }
