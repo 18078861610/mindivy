@@ -140,11 +140,20 @@ body.editor {
     .topic .float-num {
       position:absolute;
       z-index:2;
-      right:0;top:-20px;
+      right:0;
       height:30px;line-height:30px;
-      color:#009800;
       font-weight:bold;
-      font-size:20px;
+      font-size:28px;
+      z-index:2;
+
+      &.plus {
+        top:-20px;
+        color:#009800;
+      }
+      &.minus {
+        bottom:-20px;
+        color:#E54028;
+      }
     }
 
     canvas {

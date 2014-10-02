@@ -229,6 +229,9 @@ class Mindmap
         when 13 # enter
           evt.preventDefault()
           @active_topic.handle_enter_keydown() if @active_topic
+        when 46 # delete
+          evt.preventDefault()
+          @active_topic.handle_delete_keydown() if @active_topic
 
 
 jQuery(document).ready ->

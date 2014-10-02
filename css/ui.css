@@ -120,12 +120,17 @@ body.editor {
       position: absolute;
       z-index: 2;
       right: 0;
-      top: -20px;
       height: 30px;
       line-height: 30px;
-      color: #009800;
       font-weight: bold;
-      font-size: 20px; }
+      font-size: 28px;
+      z-index: 2; }
+      .mindmap .topics-area .topic .float-num.plus {
+        top: -20px;
+        color: #009800; }
+      .mindmap .topics-area .topic .float-num.minus {
+        bottom: -20px;
+        color: #E54028; }
     .mindmap .topics-area canvas {
       position: absolute;
       pointer-events: none; }

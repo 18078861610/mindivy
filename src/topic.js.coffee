@@ -194,7 +194,6 @@ class Topic
       @$el.removeClass 'flash-highlight'
     , 500
 
-
     # 增加节点时，父节点显示 +1 效果
     $float_num = jQuery '<div>'
       .addClass 'float-num'
@@ -295,6 +294,49 @@ class Topic
     return @
 
 
+  # 删除当前节点以及所有子节点
+  delete_topic: ->
+    # 删除 dom
+    # 遍历，清除所有子节点 dom
+    @_delete_r @
+    # 清除父子关系
+    parent_children = @parent.children
+    idx = parent_children.indexOf @
+    arr0 = parent_children[0 ... idx]
+    arr1 = parent_children[idx + 1 .. -1]
+    parent_children = arr0.concat arr1
+    @parent.children = parent_children
+    console.log arr0, arr1, @parent.children
+
+    if @parent.children.length is 0
+      @parent.$canvas.remove()
+
+    # 删除节点时，父节点显示 -1 效果
+    $pel = @parent.$el
+
+    $float_num = jQuery '<div>'
+      .addClass 'float-num'
+      .addClass 'minus'
+      .html '-1'
+      .appendTo $pel.css 'z-index', '2'
+
+      .animate
+        'bottom': '-=20'
+        'opacity': '0'
+      , 600, =>
+        $float_num.remove()
+        $pel.css 'z-index', ''
+
+    @parent = null
+
+  _delete_r: (topic)->
+    for child in topic.children
+      @_delete_r child
+
+    topic.$canvas.remove() if topic.$canvas
+    topic.$el.remove()
+
+
   # 处理节点点击事件
   handle_click: ->
     return @fsm.select() if @fsm.can 'select'
@@ -330,6 +372,16 @@ class Topic
       after: @parent.children.indexOf @
     }
     @mindmap.layout()
+
+
+  # 处理 delete 键按下事件
+  handle_delete_keydown: ->
+    return if not @fsm.is 'active'
+
+    if not @is_root()
+      @delete_topic()
+      @mindmap.layout()
+
 
   is_root: ->
     return @depth is 0
