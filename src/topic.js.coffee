@@ -266,9 +266,11 @@ class Topic
   # 在当前节点增加一个新的子节点
   # options
   #   flash: 新增节点时是否有闪烁效果
+  #   after: 新增的节点在哪个同级节点的后面，如果不传的话默认最后一个
   insert_topic: (options)->
     options ||= {}
     flash = options.flash
+    after = options.after
 
     if @depth is 0
       text = Topic.LV1_TOPIC_TEXT
@@ -279,7 +281,14 @@ class Topic
     child_topic.depth = @depth + 1
     child_topic.flash = flash
 
-    @children.push child_topic
+    if after is undefined
+      @children.push child_topic
+    else
+      arr0 = @children[0..after]
+      arr1 = @children[after + 1..@children.length]
+      @children = (arr0.concat [child_topic]).concat arr1
+      console.log @children
+
     child_topic.parent = @
 
     Topic.set child_topic
@@ -304,7 +313,7 @@ class Topic
   handle_insert_keydown: ->
     return if not @fsm.is 'active'
 
-    @insert_topic {flash:true}
+    @insert_topic {flash: true}
     @mindmap.layout()
 
   # 处理回车键按下事件
@@ -312,9 +321,15 @@ class Topic
     return if not @fsm.is 'active'
 
     if @is_root()
-      @insert_topic {flash:true}
+      @insert_topic {flash: true}
       @mindmap.layout()
       return
+
+    @parent.insert_topic {
+      flash: true
+      after: @parent.children.indexOf @
+    }
+    @mindmap.layout()
 
   is_root: ->
     return @depth is 0
