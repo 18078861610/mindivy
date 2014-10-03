@@ -204,6 +204,11 @@ class Mindmap
       evt.stopPropagation()
       topic = Topic.get jQuery(this).data('id')
       topic.handle_click()
+
+    @$el.delegate '.topic .joint', 'click', (evt)->
+      evt.stopPropagation()
+      topic = Topic.get jQuery(this).closest('.topic').data('id')
+      topic.handle_joint_click()
       
       
     # 点击节点外区域

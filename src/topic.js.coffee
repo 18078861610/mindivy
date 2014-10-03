@@ -168,6 +168,8 @@ class Topic extends Module
 
   constructor: (@text, @mindmap)->
     @init_fsm()
+    @init_open_close_fsm()
+
     @id = Utils.generate_id()
     @children = []
   
@@ -199,7 +201,6 @@ class Topic extends Module
     @fsm.onenterediting = =>
       @mindmap.editing_topic = @
       @$el.addClass 'editing'
-
       @text_ipter = new TextInputer(@)
 
 
@@ -213,6 +214,56 @@ class Topic extends Module
 
       @recalc_size()
       @mindmap.layout()
+
+
+  init_open_close_fsm: ->
+    @oc_fsm = StateMachine.create
+      initial: 'opened'
+      events: [
+        { name: 'open',  from: 'closed', to: 'opened'}
+        { name: 'close', from: 'opened', to: 'closed'}
+      ]
+
+    @oc_fsm.onenteropened = =>
+      @$el.addClass 'opened'
+
+    @oc_fsm.onleaveopened = =>
+      @$el.removeClass 'opened'
+
+    @oc_fsm.onenterclosed = =>
+      @$el.addClass 'closed'
+
+    @oc_fsm.onleaveclosed = =>
+      @$el.removeClass 'closed'
+
+    _open_r = (topic)=>
+      for child in topic.children
+        child.$el.show()
+        
+        continue if child.oc_fsm.is 'closed'
+        child.$canvas.show() if child.$canvas
+        _open_r child
+
+    @oc_fsm.onbeforeopen = =>
+      console.log '展开子节点'
+      @$canvas.show()
+      _open_r @
+
+    _close_r = (topic)=>
+      for child in topic.children
+        child.$el.hide()
+        # 当节点被折叠时，解除 active 状态
+        child.fsm.stop_edit() if child.fsm.can 'stop_edit'
+        child.fsm.unselect() if child.fsm.can 'unselect'
+
+        continue if child.oc_fsm.is 'closed'
+        child.$canvas.hide() if child.$canvas
+        _close_r child
+
+    @oc_fsm.onbeforeclose = =>
+      console.log '折叠子节点'
+      @$canvas.hide()
+      _close_r @
 
 
   # 设置节点文字
@@ -257,12 +308,20 @@ class Topic extends Module
       # 当前节点 dom
       @$el = jQuery '<div>'
         .addClass 'topic'
+        .addClass 'opened'
         .data 'id', @id
+
+      @$el.addClass 'root' if @is_root()
 
       # 节点上的文字
       @$text = jQuery '<pre>'
         .addClass 'text'
         .text @text
+        .appendTo @$el
+
+      # 折叠展开的操作区域
+      @$joint = jQuery '<div>'
+        .addClass 'joint'
         .appendTo @$el
 
       @$el.appendTo @mindmap.$topics_area
@@ -271,6 +330,13 @@ class Topic extends Module
 
       if @flash
         @flash_animate()
+
+    # 标记叶子节点
+    if @has_children()
+      @$el.removeClass 'leaf'
+    else
+      @$el.addClass 'leaf'
+
 
     return @$el
 
@@ -396,6 +462,11 @@ class Topic extends Module
   handle_click: ->
     return @fsm.select() if @fsm.can 'select'
     return @fsm.start_edit() if @fsm.can 'start_edit'
+
+  # 处理节点折叠点点击事件
+  handle_joint_click: ->
+    return @oc_fsm.open() if @oc_fsm.is 'closed'
+    return @oc_fsm.close() if @oc_fsm.is 'opened'
 
 
   # 处理节点外点击事件
