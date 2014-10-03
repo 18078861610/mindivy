@@ -1,3 +1,84 @@
+class ImageDialog
+  constructor: (@topic)->
+    @img_url = @topic.img_url
+
+  render: ->
+    @$overlay = jQuery '<div>'
+      .addClass 'image-dialog-overlay'
+      .appendTo @topic.mindmap.$el
+
+    @$dialog = jQuery '<div>'
+      .addClass 'image-dialog'
+      .appendTo @topic.mindmap.$el
+
+
+    $ops = jQuery '<div>'
+      .addClass 'image-dialog-ops'
+      .appendTo @$dialog
+
+
+    @$ok = jQuery '<div>'
+      .addClass 'btn ok'
+      .html '确定'
+      .appendTo $ops
+
+    @$cancel = jQuery '<div>'
+      .addClass 'btn cancel'
+      .html '取消'
+      .appendTo $ops
+
+
+    @$delete = jQuery '<div>'
+      .addClass 'btn delete'
+      .html '删除图片'
+      .appendTo $ops
+
+
+    @$url_ipter = jQuery '<input>'
+      .attr 'type', 'text'
+      .attr 'placeholder', '输入图片 URL'
+      .addClass 'url-ipter'
+      .appendTo @$dialog
+
+    @$image_loading_area = jQuery '<div>'
+      .addClass 'image-loading-area'
+      .appendTo @$dialog
+
+    if @img_url
+      @$url_ipter.val @img_url
+      @_show_img @img_url
+
+    @bind_events()
+
+  bind_events: ->
+    @$overlay.on 'click', (evt)=>
+      @destroy()
+
+    @$cancel.on 'click', (evt)=>
+      @destroy()
+
+    @$url_ipter.on 'input', (evt)=>
+      url = @$url_ipter.val()
+      @_show_img url
+
+    @$ok.on 'click', (evt)=>
+      url = @$url_ipter.val()
+      @topic.set_image_url url
+      @destroy()
+
+    @$delete.on 'click', (evt)=>
+      @topic.set_image_url null
+      @destroy()
+
+  destroy: ->
+    @$overlay.remove()
+    @$dialog.remove()
+
+  _show_img: (url)->
+    @$image_loading_area
+      .css 'background-image', "url(#{url})"
+
+
 class TextInputer
   constructor: (@topic)->
     @$topic_text = @topic.$text
@@ -324,6 +405,11 @@ class Topic extends Module
 
       @$el.addClass 'root' if @is_root()
 
+      # 节点上的图片
+      @$image = jQuery '<div>'
+        .addClass 'image'
+        .appendTo @$el
+
       # 节点上的文字
       @$text = jQuery '<pre>'
         .addClass 'text'
@@ -337,8 +423,6 @@ class Topic extends Module
 
       @$el.appendTo @mindmap.$topics_area
 
-      @recalc_size()
-
       if @flash
         @flash_animate()
 
@@ -348,6 +432,15 @@ class Topic extends Module
     else
       @$el.addClass 'leaf'
 
+    # 显示图片
+    if @img_url
+      @$el.addClass 'with-image'
+      @$image.css 'background-image', "url(#{@img_url})"
+    else
+      @$el.removeClass 'with-image'
+
+    # 重新计算尺寸
+    @recalc_size()
 
     return @$el
 
@@ -546,6 +639,15 @@ class Topic extends Module
             idx = ~~((length - 1) / 2)
             if child = @children[idx]
               child.fsm.select()
+
+
+  open_image_dialog: ->
+    new ImageDialog(@).render()
+
+  # 根据 url 设置节点图片，如果传入的值是 null，则去除图片
+  set_image_url: (url)->
+    @img_url = url
+    @mindmap.layout()
 
 
 window.Topic = Topic

@@ -226,31 +226,38 @@ class Mindmap
     # 全局按键事件
     jQuery(document).on 'keydown', (evt)=>
       console.log "keyCode: " + evt.keyCode
-      switch evt.keyCode
-        when 32 # spacebar
+
+      if @active_topic  
+        switch evt.keyCode
+          when 32 # spacebar
+            evt.preventDefault()
+            @active_topic.handle_space_keydown()
+          when 45 # insert
+            evt.preventDefault()
+            @active_topic.handle_insert_keydown()
+          when 13 # enter
+            evt.preventDefault()
+            @active_topic.handle_enter_keydown()
+          when 46 # delete
+            evt.preventDefault()
+            @active_topic.handle_delete_keydown()
+          when 38 # ↑
+            evt.preventDefault()
+            @active_topic.handle_arrow_keydown('up')
+          when 40 # ↓
+            evt.preventDefault()
+            @active_topic.handle_arrow_keydown('down')
+          when 37 # ←
+            evt.preventDefault()
+            @active_topic.handle_arrow_keydown('left')
+          when 39 # →
+            evt.preventDefault()
+            @active_topic.handle_arrow_keydown('right')
+
+        if evt.keyCode is 73 and evt.shiftKey
+          # console.log '打开添加图片对话框'
           evt.preventDefault()
-          @active_topic.handle_space_keydown() if @active_topic
-        when 45 # insert
-          evt.preventDefault()
-          @active_topic.handle_insert_keydown() if @active_topic
-        when 13 # enter
-          evt.preventDefault()
-          @active_topic.handle_enter_keydown() if @active_topic
-        when 46 # delete
-          evt.preventDefault()
-          @active_topic.handle_delete_keydown() if @active_topic
-        when 38 # ↑
-          evt.preventDefault()
-          @active_topic.handle_arrow_keydown('up')
-        when 40 # ↓
-          evt.preventDefault()
-          @active_topic.handle_arrow_keydown('down')
-        when 37 # ←
-          evt.preventDefault()
-          @active_topic.handle_arrow_keydown('left')
-        when 39 # →
-          evt.preventDefault()
-          @active_topic.handle_arrow_keydown('right')
+          @active_topic.open_image_dialog()
 
 
 jQuery(document).ready ->
