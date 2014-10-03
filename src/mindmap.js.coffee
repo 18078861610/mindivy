@@ -280,6 +280,10 @@ jQuery(document).ready ->
     .insert_topic()
     .insert_topic()
 
+  mindmap.root_topic.children[0].children[0]
+    .insert_topic()
+    .insert_topic()
+
   mindmap.layout()
 
 

@@ -1,16 +1,3 @@
-Utils =
-  generate_id: ->
-    str = 'abcdefghijklmnopqrstuvwxyz0123456789'
-    l = str.length
-    re = ''
-
-    for i in [0...7]
-      r = ~~(Math.random() * l)
-      re = re + str[r]
-
-    return re
-
-
 class TextInputer
   constructor: (@topic)->
     @$topic_text = @topic.$text
@@ -98,7 +85,61 @@ class TextInputer
       # do nothing 执行 textarea 原始事件
 
 
-class Topic
+ModuleTopicNav =
+  # 判断是否是根节点
+  is_root: ->
+    return @depth is 0
+
+  # 获取当前节点的下一个同级节点，如果没有的话，返回 null
+  next: ->
+    return null if @is_root()
+    idx = @parent.children.indexOf @
+    return @parent.children[idx + 1]
+
+  # 返回当前节点的上一个同级节点，如果没有的话，返回 null
+  prev: ->
+    return null if @is_root()
+    idx = @parent.children.indexOf @
+    return @parent.children[idx - 1]
+
+  # 找到同级的上一个节点，不管是不是同一个父节点
+  visible_prev: ->
+    return null if @is_root()
+    return @prev() if @prev()
+
+    p = @parent
+    while p = p.visible_prev()
+      return p.last_child() if p.has_children()
+
+    return null
+
+  # 找到同级的下一个节点，不管是不是同一个父节点
+  visible_next: ->
+    return null if @is_root()
+    return @next() if @next()
+
+    p = @parent
+    while p = p.visible_next()
+      return p.first_child() if p.has_children()
+
+    return null
+
+  # 第一个子节点，如果没有子节点，返回 null
+  first_child: ->
+    return @children[0]
+
+  # 最后一个子节点，如果没有子节点，返回 null
+  last_child: ->
+    return @children[@children.length - 1]
+
+  # 判断该子节点是否有子节点
+  has_children: ->
+    !!@children.length
+
+
+class Topic extends Module
+  @include ModuleTopicNav
+
   @HASH: {}
 
   @ROOT_TOPIC_TEXT : 'Central Topic'
@@ -374,6 +415,7 @@ class Topic
 
     @insert_topic {flash: true}
     @mindmap.layout()
+    @children[@children.length - 1].fsm.select()
 
   # 处理回车键按下事件
   handle_enter_keydown: ->
@@ -389,6 +431,7 @@ class Topic
       after: @parent.children.indexOf @
     }
     @mindmap.layout()
+    @next().fsm.select()
 
 
   # 处理 delete 键按下事件
@@ -402,51 +445,21 @@ class Topic
   handle_arrow_keydown: (direction)->
     switch direction
       when 'up'
-        return if @is_root()
-        if @prev()
-          @prev().fsm.select()
-        else
-          if @parent.prev() and @parent.prev().children.length
-            children = @parent.prev().children
-            children[children.length - 1].fsm.select()
+        topic = @visible_prev()
+        topic.fsm.select() if topic
 
       when 'down'
-        return if @is_root()
-        if @next()
-          @next().fsm.select()
-        else
-          if @parent.next() and @parent.next().children.length
-            children = @parent.next().children
-            children[0].fsm.select()
+        topic = @visible_next()
+        topic.fsm.select() if topic
 
       when 'left'
         @parent.fsm.select() if @parent
 
       when 'right'
         if length = @children.length
-          idx = ~~(length / 2)
+          idx = ~~((length - 1) / 2)
           if child = @children[idx]
             child.fsm.select()
-
-
-  is_root: ->
-    return @depth is 0
-
-  # 判断该子节点是否有子节点
-  has_children: ->
-    !!@children.length
-
-  # 获取当前节点的下一个同级节点，如果没有的话，返回 null
-  next: ->
-    return null if @is_root()
-    idx = @parent.children.indexOf @
-    return @parent.children[idx + 1]
-
-  prev: ->
-    return null if @is_root()
-    idx = @parent.children.indexOf @
-    return @parent.children[idx - 1]
-
 
 
 window.Topic = Topic
