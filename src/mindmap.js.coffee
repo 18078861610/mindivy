@@ -2,6 +2,7 @@ class BasicLayout
   constructor: (@mindmap)->
     @IDEA_Y_PADDING = 10
     @IDEA_X_PADDING = 30
+    @JOINT_WIDTH = 16 # 折叠点的宽度
 
   go: ->
     root_topic = @mindmap.root_topic
@@ -18,10 +19,11 @@ class BasicLayout
   _layout_r1: (topic)->
     layout_children_height = 0
 
-    for child in topic.children
-      @_layout_r1 child
-      layout_children_height += child.layout_area_height
-    layout_children_height += @IDEA_Y_PADDING * (topic.children.length - 1)
+    if topic.is_opened()
+      for child in topic.children
+        @_layout_r1 child
+        layout_children_height += child.layout_area_height
+      layout_children_height += @IDEA_Y_PADDING * (topic.children.length - 1)
     
     topic.layout_children_height = layout_children_height
     topic.render() # 生成 dom，同时计算 topic.layout_height
@@ -130,7 +132,7 @@ class BasicLayout
     # 绘制贝塞尔曲线
     # 两个端点
     # 父节点的右侧中点
-    x0 = parent.layout_left + parent.layout_width
+    x0 = parent.layout_left + parent.layout_width + @JOINT_WIDTH
     y0 = parent.layout_top  + parent.layout_height / 2.0
 
     # 子节点的左侧中点

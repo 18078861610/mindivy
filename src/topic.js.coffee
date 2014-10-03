@@ -103,24 +103,26 @@ ModuleTopicNav =
     return @parent.children[idx - 1]
 
   # 找到同级的上一个节点，不管是不是同一个父节点
+  # 需要结合节点的折叠状态来判断
   visible_prev: ->
     return null if @is_root()
     return @prev() if @prev()
 
     p = @parent
     while p = p.visible_prev()
-      return p.last_child() if p.has_children()
+      return p.last_child() if p.has_children() and p.is_opened()
 
     return null
 
   # 找到同级的下一个节点，不管是不是同一个父节点
+  # 需要结合节点的折叠状态来判断
   visible_next: ->
     return null if @is_root()
     return @next() if @next()
 
     p = @parent
     while p = p.visible_next()
-      return p.first_child() if p.has_children()
+      return p.first_child() if p.has_children() and p.is_opened()
 
     return null
 
@@ -137,8 +139,17 @@ ModuleTopicNav =
     !!@children.length
 
 
+ModuleTopicState =
+  is_opened: ->
+    return @oc_fsm.is 'opened'
+
+  is_closed: ->
+    return @oc_fsm.is 'closed'
+
+
 class Topic extends Module
   @include ModuleTopicNav
+  @include ModuleTopicState
 
   @HASH: {}
 
@@ -240,7 +251,7 @@ class Topic extends Module
       for child in topic.children
         child.$el.show()
         
-        continue if child.oc_fsm.is 'closed'
+        continue if child.is_closed()
         child.$canvas.show() if child.$canvas
         _open_r child
 
@@ -256,7 +267,7 @@ class Topic extends Module
         child.fsm.stop_edit() if child.fsm.can 'stop_edit'
         child.fsm.unselect() if child.fsm.can 'unselect'
 
-        continue if child.oc_fsm.is 'closed'
+        continue if child.is_closed()
         child.$canvas.hide() if child.$canvas
         _close_r child
 
@@ -465,8 +476,11 @@ class Topic extends Module
 
   # 处理节点折叠点点击事件
   handle_joint_click: ->
-    return @oc_fsm.open() if @oc_fsm.is 'closed'
-    return @oc_fsm.close() if @oc_fsm.is 'opened'
+    if @is_closed()
+      @oc_fsm.open()
+    else if @is_opened()
+      @oc_fsm.close()
+    @mindmap.layout()
 
 
   # 处理节点外点击事件
@@ -527,10 +541,11 @@ class Topic extends Module
         @parent.fsm.select() if @parent
 
       when 'right'
-        if length = @children.length
-          idx = ~~((length - 1) / 2)
-          if child = @children[idx]
-            child.fsm.select()
+        if @is_opened() 
+          if length = @children.length
+            idx = ~~((length - 1) / 2)
+            if child = @children[idx]
+              child.fsm.select()
 
 
 window.Topic = Topic
