@@ -10,6 +10,13 @@ Utils =
 
     return re
 
+  # 返回一个数组中间的元素
+  center_elm_of: (array)->
+    if length = array.length
+      idx = ~~((length - 1) / 2)
+      return array[idx]
+    return null
+
 class Module
   @moduleKeywords: ['extended', 'included']
   @extend: (obj) ->

@@ -78,8 +78,6 @@ body.editor {
       -ms-transition: all 0.3s ease-out;
       -o-transition: all 0.3s ease-out;
       transition: all 0.3s ease-out; }
-      .mindmap .topics-area .topic.left-side {
-        background-color: #fcba60; }
       .mindmap .topics-area .topic:hover {
         border-color: rgba(0, 0, 0, 0.4); }
       .mindmap .topics-area .topic.active {
@@ -93,30 +91,32 @@ body.editor {
         padding: 0px 5px;
         font-weight: bold;
         color: rgba(0, 0, 0, 0.6); }
-      .mindmap .topics-area .topic.editing .text {
-        pointer-events: none;
-        opacity: 0; }
-      .mindmap .topics-area .topic.editing .text-ipter-box {
-        position: absolute;
-        background: #eeeeee;
-        padding-right: 10px; }
-        .mindmap .topics-area .topic.editing .text-ipter-box textarea.text-ipter {
-          resize: none;
-          border: 0 none;
-          padding: 0;
-          margin: 0;
-          background: transparent;
-          outline: none;
-          white-space: nowrap;
-          min-height: 24px;
-          line-height: 24px;
-          font-size: 16px;
-          overflow: hidden;
-          padding: 0px 5px;
-          font-weight: bold;
-          color: rgba(0, 0, 0, 0.6);
+      .mindmap .topics-area .topic.editing {
+        z-index: 5; }
+        .mindmap .topics-area .topic.editing .text {
+          pointer-events: none;
+          opacity: 0; }
+        .mindmap .topics-area .topic.editing .text-ipter-box {
           position: absolute;
-          padding-right: 100px; }
+          background: #eeeeee;
+          padding-right: 10px; }
+          .mindmap .topics-area .topic.editing .text-ipter-box textarea.text-ipter {
+            resize: none;
+            border: 0 none;
+            padding: 0;
+            margin: 0;
+            background: transparent;
+            outline: none;
+            white-space: nowrap;
+            min-height: 24px;
+            line-height: 24px;
+            font-size: 16px;
+            overflow: hidden;
+            padding: 0px 5px;
+            font-weight: bold;
+            color: rgba(0, 0, 0, 0.6);
+            position: absolute;
+            padding-right: 100px; }
       .mindmap .topics-area .topic.flash-highlight {
         background-color: #FFCC3F; }
       .mindmap .topics-area .topic.leaf .joint, .mindmap .topics-area .topic.root .joint {

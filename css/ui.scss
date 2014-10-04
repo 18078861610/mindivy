@@ -108,9 +108,9 @@ body.editor {
       @include transition(all .3s ease-out);
 
       // 为了便于调试，临时增加的样式，用来区分左右两侧节点
-      &.left-side {
-        background-color: lighten(#F18D05, 20%);
-      }
+      // &.left-side {
+      //   background-color: lighten(#F18D05, 20%);
+      // }
 
 
       &:hover  { border-color: $topic-hover-border;}
@@ -121,6 +121,8 @@ body.editor {
 
 
       &.editing {
+        z-index: 5;
+
         .text {
           pointer-events:none;
           opacity:0;

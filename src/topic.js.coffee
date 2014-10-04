@@ -174,12 +174,37 @@ ModuleTopicNav =
   # 获取当前节点的下一个同级节点，如果没有的话，返回 null
   next: ->
     return null if @is_root()
-    idx = @parent.children.indexOf @
-    return @parent.children[idx + 1]
+
+    if @depth is 1
+      if @side is 'left'
+        left_children = @parent.left_children()
+        idx = left_children.indexOf @
+        return left_children[idx + 1]
+
+      if @side is 'right'
+        right_children = @parent.right_children()
+        idx = right_children.indexOf @
+        return right_children[idx + 1]
+
+    else
+      idx = @parent.children.indexOf @
+      return @parent.children[idx + 1]
 
   # 返回当前节点的上一个同级节点，如果没有的话，返回 null
   prev: ->
     return null if @is_root()
+
+    if @depth is 1
+      if @side is 'left'
+        left_children = @parent.left_children()
+        idx = left_children.indexOf @
+        return left_children[idx - 1]
+
+      if @side is 'right'
+        right_children = @parent.right_children()
+        idx = right_children.indexOf @
+        return right_children[idx - 1]
+
     idx = @parent.children.indexOf @
     return @parent.children[idx - 1]
 
@@ -652,24 +677,56 @@ class Topic extends Module
       @mindmap.layout()
 
   handle_arrow_keydown: (direction)->
+    return @_handle_arrow_keydown_root(direction) if @is_root()
+    return @_handle_arrow_keydown_lvn(direction) #if @depth is 1
+
+  _handle_arrow_keydown_root: (direction)->
     switch direction
-      when 'up'
-        topic = @visible_prev()
-        topic.fsm.select() if topic
-
-      when 'down'
-        topic = @visible_next()
-        topic.fsm.select() if topic
-
       when 'left'
-        @parent.fsm.select() if @parent
+        left_children = @left_children()
+        Utils.center_elm_of(left_children).fsm.select() if left_children.length
 
       when 'right'
-        if @is_opened() 
-          if length = @children.length
-            idx = ~~((length - 1) / 2)
-            if child = @children[idx]
-              child.fsm.select()
+        right_children = @right_children()
+        Utils.center_elm_of(right_children).fsm.select() if right_children.length
+
+  _handle_arrow_keydown_lvn: (direction)->
+    if @side is 'left'
+      switch direction
+        when 'up'
+          topic = @visible_prev()
+          topic.fsm.select() if topic
+
+        when 'down'
+          topic = @visible_next()
+          topic.fsm.select() if topic
+
+        when 'left'
+          if @is_opened()
+            Utils.center_elm_of(@children).fsm.select() if @children.length
+          # else # TODO jinhan13789 提的建议
+          #   @oc_fsm.open()
+          #   @mindmap.layout()
+
+        when 'right'
+          @parent.fsm.select()
+
+    if @side is 'right'
+      switch direction
+        when 'up'
+          topic = @visible_prev()
+          topic.fsm.select() if topic
+
+        when 'down'
+          topic = @visible_next()
+          topic.fsm.select() if topic
+
+        when 'left'
+          @parent.fsm.select()
+
+        when 'right'
+          if @is_opened()
+            Utils.center_elm_of(@children).fsm.select() if @children.length
 
 
   open_image_dialog: ->
