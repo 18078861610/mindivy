@@ -439,6 +439,12 @@ class Topic extends Module
     else
       @$el.removeClass 'with-image'
 
+    # 根据节点是左侧节点还是右侧节点，给予相应的 className
+    @$el.removeClass('left-side').removeClass('right-side')
+    @$el.addClass('left-side')  if @side is 'left'
+    @$el.addClass('right-side') if @side is 'right'
+
+
     # 重新计算尺寸
     @recalc_size()
 
@@ -478,12 +484,17 @@ class Topic extends Module
   # options
   #   flash: 新增节点时是否有闪烁效果
   #   after: 新增的节点在哪个同级节点的后面，如果不传的话默认最后一个
+
+  # 如果当前节点是根节点：
+  #   当左边的一级子节点较多（或相等），新增的一级子节点排在右边
+  #   当右边的一级子节点较多，新增的一级子节点排在左边
+
   insert_topic: (options)->
     options ||= {}
     flash = options.flash
     after = options.after
 
-    if @depth is 0
+    if @is_root()
       text = Topic.LV1_TOPIC_TEXT
     else
       text = Topic.LV2_TOPIC_TEXT
@@ -491,6 +502,17 @@ class Topic extends Module
     child_topic = new Topic text, @mindmap
     child_topic.depth = @depth + 1
     child_topic.flash = flash
+
+    if @is_root()
+      c_left  = @left_children().length
+      c_right = @right_children().length
+
+      # console.log "left: #{c_left}, right: #{c_right}"
+
+      if c_left >= c_right
+        child_topic.side = 'right'
+      else
+        child_topic.side = 'left'
 
     if after is undefined
       @children.push child_topic
@@ -504,6 +526,15 @@ class Topic extends Module
 
     Topic.set child_topic
     return @
+
+
+  # 返回根节点上的左侧子节点数组
+  left_children: ->
+    return (child for child in @children when child.side is 'left')
+
+  # 返回根节点上的右侧子节点数组
+  right_children: ->
+    return (child for child in @children when child.side is 'right')
 
 
   # 删除当前节点以及所有子节点

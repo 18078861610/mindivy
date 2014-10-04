@@ -78,8 +78,10 @@ body.editor {
       -ms-transition: all 0.3s ease-out;
       -o-transition: all 0.3s ease-out;
       transition: all 0.3s ease-out; }
+      .mindmap .topics-area .topic.left-side {
+        background-color: #fcba60; }
       .mindmap .topics-area .topic:hover {
-        border-color: #74c6f8; }
+        border-color: rgba(0, 0, 0, 0.4); }
       .mindmap .topics-area .topic.active {
         border-color: rgba(0, 0, 0, 0.5);
         background: #87da93; }
@@ -134,6 +136,9 @@ body.editor {
           background: #666; }
           .mindmap .topics-area .topic .joint:hover:before, .mindmap .topics-area .topic .joint:hover:after {
             background-color: #fff !important; }
+      .mindmap .topics-area .topic.left-side .joint {
+        right: auto;
+        left: -19px; }
       .mindmap .topics-area .topic.opened .joint:before {
         content: "";
         position: absolute;

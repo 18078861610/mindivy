@@ -1,5 +1,6 @@
 $topic-bg-common: lighten(#44B2F5, 25%);
-$topic-hover-border: lighten(#44B2F5, 10%);
+// $topic-hover-border: lighten(#44B2F5, 10%);
+$topic-hover-border: rgba(black, 0.4);
 $topic-active-border: rgba(black, 0.5);
 $topic-editing-text-bg: #eee;
 
@@ -106,6 +107,11 @@ body.editor {
       border:solid $border-width transparent;
       @include transition(all .3s ease-out);
 
+      // 为了便于调试，临时增加的样式，用来区分左右两侧节点
+      &.left-side {
+        background-color: lighten(#F18D05, 20%);
+      }
+
 
       &:hover  { border-color: $topic-hover-border;}
       &.active { border-color: $topic-active-border; background:lighten(#4CC85E, 15%);}
@@ -142,15 +148,15 @@ body.editor {
         .joint {display:none;}
       }
 
+      $joint-w: 16px;
       .joint {
-        $w: 16px;
 
         position: absolute;
-        width:$w;
-        height:$w;
-        right: - $w - $border-width;
+        width:$joint-w;
+        height:$joint-w;
+        right: - $joint-w - $border-width;
         top:50%;
-        margin-top:-$w/2;
+        margin-top:-$joint-w/2;
         // background-color:black;
         background-color: white;
         border-radius:100px;
@@ -162,6 +168,11 @@ body.editor {
           background:#666;
           &:before, &:after {background-color:#fff !important;}
         }
+      }
+
+      &.left-side .joint {
+        right:auto;
+        left:- $joint-w - $border-width;
       }
 
       &.opened .joint {
