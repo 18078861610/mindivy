@@ -276,6 +276,7 @@ class Topic extends Module
         { name: 'stop_edit',  from: 'editing', to: 'active' }
       ]
 
+
     # 切换与退出选中状态
     @fsm.onbeforeselect = =>
       if @mindmap.active_topic and @mindmap.active_topic != @
@@ -303,7 +304,6 @@ class Topic extends Module
       @set_text @text_ipter.text()
       @text_ipter.destroy()
       delete @text_ipter
-
       @recalc_size()
       @mindmap.layout()
 

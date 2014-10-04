@@ -102,7 +102,7 @@ class BasicLayout
 
     t = layout_children_top
     for child in topic.children
-      left = layout_children_right - topic.layout_width
+      left = layout_children_right - child.layout_width
       top  = t + (child.layout_area_height - child.layout_height) / 2.0
       child.pos left, top
       @_layout_r2_left child
@@ -157,7 +157,7 @@ class BasicLayout
       bottom_right = topic.layout_right_children_top + topic.layout_right_children_height # 右侧总高度
       bottom = Math.max bottom_left, bottom_right
 
-      console.log left, right, top, bottom
+      # console.log left, right, top, bottom
 
     else
       # 左侧节点
