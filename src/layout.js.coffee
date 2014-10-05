@@ -1,7 +1,7 @@
 class BasicLayout
   constructor: (@mindmap)->
-    @IDEA_Y_PADDING = 10
-    @IDEA_X_PADDING = 30
+    @TOPIC_Y_PADDING = 10
+    @TOPIC_X_PADDING = 30
     @JOINT_WIDTH = 16 # 折叠点的宽度
 
   go: ->
@@ -16,126 +16,83 @@ class BasicLayout
     root_topic.pos 0, 0
     @_layout_r2 root_topic
 
-  _layout_r1: (topic)->
 
+  ## TODO 重构
+  _layout_r1: (topic)->
     # 如果不是一级子节点/根节点，根据父节点的 side 来为当前节点的 side 赋值
     if topic.depth > 1
       topic.side = topic.parent.side
 
+
     # 如果是根节点，分成左右两侧计算布局数据
     if topic.is_root()
-      layout_left_children_height = 0
-      layout_right_children_height = 0
+      topic.layout_left_children_height = 0
+      topic.layout_right_children_height = 0
 
-      for child in topic.right_children()
+      topic.left_children_each (i, child)=>
         @_layout_r1 child
-        layout_right_children_height += child.layout_area_height
-      layout_right_children_height += @IDEA_Y_PADDING * (topic.right_children().length - 1)
+        topic.layout_left_children_height += child.layout_area_height + @TOPIC_Y_PADDING
+      topic.layout_left_children_height -= @TOPIC_Y_PADDING
 
-
-      for child in topic.left_children()
+      topic.right_children_each (i, child)=>
         @_layout_r1 child
-        layout_left_children_height += child.layout_area_height
-      layout_left_children_height += @IDEA_Y_PADDING * (topic.left_children().length - 1)
+        topic.layout_right_children_height += child.layout_area_height + @TOPIC_Y_PADDING
+      topic.layout_right_children_height -= @TOPIC_Y_PADDING
 
-      topic.layout_left_children_height = layout_left_children_height
-      topic.layout_right_children_height = layout_right_children_height
       topic.render()
 
       return
 
     
-    layout_children_height = 0
+    topic.layout_left_children_height  = 0
+    topic.layout_right_children_height = 0
     if topic.is_opened()
       for child in topic.children
         @_layout_r1 child
-        layout_children_height += child.layout_area_height
-      layout_children_height += @IDEA_Y_PADDING * (topic.children.length - 1)
-    
-    topic.layout_children_height = layout_children_height
+        topic.layout_left_children_height  += child.layout_area_height + @TOPIC_Y_PADDING
+        topic.layout_right_children_height += child.layout_area_height + @TOPIC_Y_PADDING
+
+      topic.layout_left_children_height  -= @TOPIC_Y_PADDING
+      topic.layout_right_children_height -= @TOPIC_Y_PADDING
+
     topic.render() # 生成 dom，同时计算 topic.layout_height
-    topic.layout_area_height = Math.max topic.layout_height, layout_children_height
+    topic.layout_area_height = Math.max topic.layout_height, topic.layout_left_children_height
 
 
   _layout_r2: (topic)->
     mid_y = topic.layout_top + topic.layout_height / 2.0
 
-    # 右侧
-    layout_right_children_top  = mid_y - topic.layout_right_children_height / 2.0
-    layout_right_children_left = topic.layout_left + topic.layout_width + @IDEA_X_PADDING
-
-    t = layout_right_children_top
-    for child in topic.right_children()
-      left = layout_right_children_left
-      top  = t + (child.layout_area_height - child.layout_height) / 2.0
-      child.pos left, top
-      @_layout_r2_right child
-
-      t += child.layout_area_height + @IDEA_Y_PADDING
-
-    topic.layout_right_children_top = layout_right_children_top
-    topic.layout_right_children_left = layout_right_children_left
-
-
     # 左侧
-    layout_left_children_top   = mid_y - topic.layout_left_children_height / 2.0
-    layout_left_children_right = topic.layout_left - @IDEA_X_PADDING
+    topic.layout_left_children_top   = mid_y - topic.layout_left_children_height / 2.0
+    topic.layout_left_children_right = topic.layout_left - @TOPIC_X_PADDING
 
-    t = layout_left_children_top
-    for child in topic.left_children()
-      left = layout_left_children_right - child.layout_width
+    t = topic.layout_left_children_top
+    topic.left_children_each (i, child)=>
+      left = topic.layout_left_children_right - child.layout_width
       top = t + (child.layout_area_height - child.layout_height) / 2.0
       child.pos left, top
-      @_layout_r2_left child
+      @_layout_r2 child
 
-      t += child.layout_area_height + @IDEA_Y_PADDING
-
-    topic.layout_left_children_top = layout_left_children_top
-    topic.layout_left_children_right = layout_left_children_right
+      t += child.layout_area_height + @TOPIC_Y_PADDING
 
 
-  # 针对左侧子节点的遍历
-  _layout_r2_left: (topic)->
-    mid_y = topic.layout_top + topic.layout_height / 2.0
-    layout_children_top = mid_y - topic.layout_children_height / 2.0
-    layout_children_right = topic.layout_left - @IDEA_X_PADDING
+    # 右侧
+    topic.layout_right_children_top  = mid_y - topic.layout_right_children_height / 2.0
+    topic.layout_right_children_left = topic.layout_left + topic.layout_width + @TOPIC_X_PADDING
 
-    t = layout_children_top
-    for child in topic.children
-      left = layout_children_right - child.layout_width
+    t = topic.layout_right_children_top
+    topic.right_children_each (i, child)=>
+      left = topic.layout_right_children_left
       top  = t + (child.layout_area_height - child.layout_height) / 2.0
       child.pos left, top
-      @_layout_r2_left child
+      @_layout_r2 child
 
-      t += child.layout_area_height + @IDEA_Y_PADDING
-
-    topic.layout_children_top = layout_children_top
-    topic.layout_children_right = layout_children_right
-
-
-  # 针对右侧子节点的遍历
-  _layout_r2_right: (topic)->
-    mid_y = topic.layout_top + topic.layout_height / 2.0
-    layout_children_top = mid_y - topic.layout_children_height / 2.0
-    layout_children_left = topic.layout_left + topic.size().width + @IDEA_X_PADDING
-
-    t = layout_children_top
-    for child in topic.children
-      left = layout_children_left
-      top  = t + (child.layout_area_height - child.layout_height) / 2.0
-      child.pos left, top
-      @_layout_r2_right child
-
-      t += child.layout_area_height + @IDEA_Y_PADDING
-
-    topic.layout_children_top = layout_children_top
-    topic.layout_children_left = layout_children_left
+      t += child.layout_area_height + @TOPIC_Y_PADDING
 
   draw_lines: ->
     # console.log '开始画线'
     root_topic = @mindmap.root_topic
     @_d_r root_topic
-
 
   _d_r: (topic)->
     if topic.has_children()
@@ -162,16 +119,16 @@ class BasicLayout
     else
       # 左侧节点
       if topic.side is 'left'
-        left  = topic.layout_children_right - 50 # 所有子节点的右边缘，向左偏移 50px
+        left  = topic.layout_left_children_right - 50 # 所有子节点的右边缘，向左偏移 50px
         right = topic.layout_left + topic.layout_width # 当前节点的右边缘
 
       # 右侧节点
       if topic.side is 'right'
         left  = topic.layout_left # 当前节点的左边缘
-        right = topic.layout_children_left + 50 # 所有子节点的左边缘，向右偏移 50px
+        right = topic.layout_right_children_left + 50 # 所有子节点的左边缘，向右偏移 50px
 
-      top    = topic.layout_children_top # 所有子节点的上边缘
-      bottom = top + topic.layout_children_height # 所有子节点的下边缘
+      top    = topic.layout_left_children_top # 所有子节点的上边缘
+      bottom = top + topic.layout_left_children_height # 所有子节点的下边缘
 
     # 计算 canvas 区域宽高
     width  = right - left
@@ -228,7 +185,11 @@ class BasicLayout
     y1 = child.layout_top + child.layout_height / 2.0
 
     # 两个控制点
-    xc1 = x0 + 30 
+    if child.side is 'left'
+      xc1 = x0 - 30
+    if child.side is 'right'
+      xc1 = x0 + 30 
+    
     yc1 = y0
 
     xc2 = (x0 + x1) / 2.0

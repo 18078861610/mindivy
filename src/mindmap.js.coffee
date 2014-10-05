@@ -44,6 +44,7 @@ class Mindmap
   bind_topics_events: ->
     that = this
 
+
     # 单击节点
     @$el.delegate '.topic', 'click', (evt)->
       evt.stopPropagation()

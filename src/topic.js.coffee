@@ -244,6 +244,28 @@ ModuleTopicNav =
   has_children: ->
     !!@children.length
 
+  # 返回节点上的左侧子节点数组
+  # 对右侧节点调用此方法时永远返回空
+  left_children: ->
+    return (child for child in @children when child.side is 'left')
+
+  # 返回节点上的右侧子节点数组
+  # 对左侧子节点调用此方法时永远返回空
+  right_children: ->
+    return (child for child in @children when child.side is 'right')
+
+  # 对左侧子节点进行遍历操作
+  left_children_each: (func)->
+    i = 0
+    for child in @children
+      func(i++, child) if child.side is 'left'
+
+  # 对右侧子节点进行遍历操作
+  right_children_each: (func)->
+    i = 0
+    for child in @children
+      func(i++, child) if child.side is 'right'
+
 
 ModuleTopicState =
   is_opened: ->
@@ -551,16 +573,6 @@ class Topic extends Module
 
     Topic.set child_topic
     return @
-
-
-  # 返回根节点上的左侧子节点数组
-  left_children: ->
-    return (child for child in @children when child.side is 'left')
-
-  # 返回根节点上的右侧子节点数组
-  right_children: ->
-    return (child for child in @children when child.side is 'right')
-
 
   # 删除当前节点以及所有子节点
   delete_topic: ->
