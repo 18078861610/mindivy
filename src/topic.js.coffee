@@ -267,12 +267,34 @@ ModuleTopicNav =
       func(i++, child) if child.side is 'right'
 
 
+  # 判断当前节点是否是传入的 topic 的祖先 
+  is_ancestor_of: (topic)->
+    p = topic
+    while p
+      return true if @ is p.parent
+      p = p.parent
+
+    return false
+
+
 ModuleTopicState =
   is_opened: ->
     return @oc_fsm.is 'opened'
 
   is_closed: ->
     return @oc_fsm.is 'closed'
+
+
+class Area
+  constructor: (@left, @right, @top, @bottom)->
+    #.. .
+
+  # 判断指定的坐标是否在当前区域内
+  is_contain: (x, y)->
+    if @left < x and x < @right and @top < y and y < @bottom
+      return true
+
+    return false
 
 
 class Topic extends Module
@@ -473,6 +495,8 @@ class Topic extends Module
       if @flash
         @flash_animate()
 
+      # @bind_drag_event()
+
     # 标记叶子节点
     if @has_children()
       @$el.removeClass 'leaf'
@@ -503,6 +527,129 @@ class Topic extends Module
     @layout_width  = @$el.outerWidth()
     @layout_height = @$el.outerHeight()
 
+  # 绑定拖拽事件
+  bind_drag_event: ->
+    @$el.drag 'options', {
+      ondragbefore: (evt)=>
+        @drag_begin_screenX = evt.screenX
+        @drag_begin_screenY = evt.screenY
+
+        @mouse_beginX = @layout_left + evt.offsetX
+        @mouse_beginY = @layout_top  + evt.offsetY
+
+        @$el.addClass 'ondrag'
+        @$drag_placeholder = jQuery '<div>'
+          .addClass 'drag-placeholder'
+          .css
+            'left'  : @layout_left
+            'top'   : @layout_top
+            'width' : @layout_width
+            'height': @layout_height
+          .appendTo @mindmap.$topics_area
+
+        # 计算所有节点的拖拽触发区域
+        @_calc_drag_trigger_area_r @mindmap.root_topic
+
+
+      # 拖拽中回调
+      # this: drag element
+      # arg0: event
+      # arg1: instance
+      ondrag: (evt, instance)=>
+        deltaX = evt.screenX - @drag_begin_screenX
+        deltaY = evt.screenY - @drag_begin_screenY
+
+        mouseX = @mouse_beginX + deltaX
+        mouseY = @mouse_beginY + deltaY
+
+        # console.log mouseX, mouseY
+        
+        # # console.log "X方向移动距离：#{deltaX}, Y方向移动距离：#{deltaY}"
+
+        Topic.each (id, topic)=>
+          return if topic.is_root()
+          return if @ is topic
+          return if @is_ancestor_of(topic)
+
+          if topic.drag_trigger_area_child.is_contain mouseX, mouseY
+            @_show_will_drop_on(topic)
+          else
+            @_hide_will_drop_on(topic)
+
+      ondragend: (evt, instance)=>
+        @$el.removeClass 'ondrag'
+        @$drag_placeholder.remove()
+
+        deltaX = evt.screenX - @drag_begin_screenX
+        deltaY = evt.screenY - @drag_begin_screenY
+
+        mouseX = @mouse_beginX + deltaX
+        mouseY = @mouse_beginY + deltaY
+
+        # TODO 重构
+        Topic.each (id, topic)=>
+
+          return if topic.is_root()
+          return if @ is topic
+          return if @is_ancestor_of(topic)
+
+          if topic.drag_trigger_area_child.is_contain mouseX, mouseY
+            @move_to_child_of topic
+    }
+
+  # 拖拽中显示将要放置子节点的提示信息
+  _show_will_drop_on: (topic)->
+    topic.$el.addClass 'will-drop-on'
+
+  _hide_will_drop_on: (topic)->
+    topic.$el.removeClass 'will-drop-on'
+
+  _calc_drag_trigger_area_r: (topic)->
+    # 子节点拖拽触发区域
+    if not topic.is_root()
+      
+      if topic.side is 'right'
+        left = topic.layout_left + topic.layout_width / 2.0
+        right =  topic.layout_left + topic.layout_width + 60
+      
+      if topic.side is 'left'
+        left =  topic.layout_left - 60
+        right = topic.layout_left + topic.layout_width / 2.0
+
+      top = topic.layout_top
+      bottom = topic.layout_top + topic.layout_height
+
+      topic.drag_trigger_area_child = new Area(left, right, top, bottom)
+
+
+    for child in topic.children
+      @_calc_drag_trigger_area_r child
+
+
+  move_to_child_of: (topic)->
+    console.log "#{@id} 拖拽到 #{topic.id}"
+
+    @_hide_will_drop_on(topic)
+
+    @side = topic.side
+
+    # 从父节点的 children 中移除当前节点
+
+    # 清除父子关系 # TODO 重构，重复逻辑提取方法
+    parent_children = @parent.children
+    idx = parent_children.indexOf @
+    arr0 = parent_children[0 ... idx]
+    arr1 = parent_children[idx + 1 .. -1]
+    parent_children = arr0.concat arr1
+    @parent.children = parent_children
+
+
+    # 修改父节点引用
+    @parent = topic
+    topic.children.push @
+
+    @mindmap.layout()
+
 
   # 计算节点的尺寸，便于其他计算使用
   size: ->
@@ -510,21 +657,6 @@ class Topic extends Module
       width: @layout_width
       height: @layout_height
     }
-
-  # 将节点定位到编辑器的指定相对位置
-  pos: (left, top, is_animate)->
-    @layout_left = left
-    @layout_top = top
-
-    if is_animate
-      @$el.animate
-        left: left
-        top: top
-      , ANIMATE_DURATION
-    else
-      @$el.css
-        left: left
-        top: top
 
 
   # 在当前节点增加一个新的子节点
@@ -591,6 +723,7 @@ class Topic extends Module
     # 删除 dom
     # 遍历，清除所有子节点 dom
     @_delete_r @
+    
     # 清除父子关系
     parent_children = @parent.children
     idx = parent_children.indexOf @
@@ -598,7 +731,8 @@ class Topic extends Module
     arr1 = parent_children[idx + 1 .. -1]
     parent_children = arr0.concat arr1
     @parent.children = parent_children
-    console.log arr0, arr1, @parent.children
+
+    # console.log arr0, arr1, @parent.children
 
     if @parent.children.length is 0
       @parent.$canvas.remove()

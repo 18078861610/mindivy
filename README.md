@@ -28,6 +28,10 @@ mindivy
   https://github.com/jakesgordon/javascript-state-machine <br/>
   有限状态机
 
+- jquery-drag.js <br/>
+  https://github.com/cloudcome/jquery-drag
+  拖拽
+
 - http://coffeescript.org/extras/coffee-script.js
 
 - http://code.jquery.com/jquery-2.1.1.min.js

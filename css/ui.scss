@@ -92,6 +92,7 @@ body.editor {
     position:absolute;
     top:50%;
     left:50%;
+    width:100px;height:100px;
 
     .topic {z-index:1;}
     canvas {z-index:0;}
@@ -105,12 +106,55 @@ body.editor {
       font-size: 0;
       background-color:$topic-bg-common;
       border:solid $border-width transparent;
-      @include transition(all .3s ease-out);
+      @include transition(all .3s);
+
+      &.ondrag {
+        opacity: 0.4;
+        @include transition(none);
+        background-color: #FFE08B;
+      }
 
       // 为了便于调试，临时增加的样式，用来区分左右两侧节点
       // &.left-side {
       //   background-color: lighten(#F18D05, 20%);
       // }
+
+      &.will-drop-on {
+        background-color: lighten(red, 30%);
+        
+        &:before {
+          content:"";
+          position: absolute;
+          height:2px;top:50%;margin-top:-1px;width:20px;
+          background-color: lighten(red, 30%);
+        }
+
+        &.right-side:before {
+          left:100%;
+        }
+
+        &.left-side:before {
+          right:100%;
+        }
+
+        &:after {
+          content:"";
+          position:absolute;
+          background-color: lighten(red, 30%);
+          top:0;bottom:0;
+          border-radius:4px;
+          width:80px;
+        }
+
+        &.right-side:after {
+          left:calc(100% + 20px);
+        }
+
+        &.left-side:after {
+          right:calc(100% + 20px);
+        }
+
+      }
 
 
       &:hover  { border-color: $topic-hover-border;}
@@ -254,6 +298,12 @@ body.editor {
       pointer-events:none;
     }
 
+    .drag-placeholder {
+      pointer-events:none;
+      background-color:rgba(black, 0.5);
+      border-radius:4px;
+      position: absolute;
+    }
   }
 
   .image-dialog-overlay {

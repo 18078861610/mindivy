@@ -1,4 +1,69 @@
-class BasicLayout
+BasicLayoutDrawLineMethods = 
+  _draw_line: (parent, child, ctx)->
+    # 在父子节点之间绘制连线
+    return @_draw_line_0 parent, child, ctx if parent.is_root()
+    @_draw_line_n parent, child, ctx
+
+  # 在根节点上绘制曲线
+  _draw_line_0: (parent, child, ctx)->
+    # 绘制贝塞尔曲线
+    # 两个端点
+    # 父节点的中心点
+    x0 = parent.layout_x_center
+    y0 = parent.layout_y_center
+
+    # 子节点的内侧中点
+    x1 = child.layout_x_inside
+    y1 = child.layout_y_center
+
+    # 两个贝塞尔曲线控制点
+    xc1 = x0 - 30 if child.side is 'left'
+    xc1 = x0 + 30 if child.side is 'right'
+    
+    yc1 = y0
+
+    xc2 = (x0 + x1) / 2.0
+    yc2 = y1 
+
+    ctx.lineWidth = 2
+    ctx.strokeStyle = '#777'
+
+    ctx.beginPath()
+    ctx.moveTo x0, y0
+    ctx.bezierCurveTo xc1, yc1, xc2, yc2, x1, y1 
+    ctx.stroke()
+
+  _draw_line_n: (parent, child, ctx)->
+    # 绘制贝塞尔曲线
+    # 两个端点
+    # 父节点的折叠柄外侧中点
+    x0 = parent.layout_x_joint_outside
+    y0 = parent.layout_y_center
+
+    # 子节点的内侧中点
+    x1 = child.layout_x_inside
+    y1 = child.layout_y_center
+
+    # 两个贝塞尔曲线控制点
+    xc1 = (x0 + x1) / 2.0
+    yc1 = y0
+
+    xc2 = xc1
+    yc2 = y1
+
+    ctx.lineWidth = 2
+    ctx.strokeStyle = '#777'
+
+    ctx.beginPath()
+    ctx.moveTo x0, y0
+    ctx.bezierCurveTo xc1, yc1, xc2, yc2, x1, y1 
+    ctx.stroke()
+
+
+
+class BasicLayout extends Module
+  @include BasicLayoutDrawLineMethods
+
   constructor: (@mindmap)->
     @TOPIC_Y_PADDING = 10
     @TOPIC_X_PADDING = 30
@@ -8,86 +73,105 @@ class BasicLayout
     root_topic = @mindmap.root_topic
 
     # 第一次遍历：深度优先遍历
-    # 渲染所有节点并且计算各个节点的布局数据
-    @_layout_r1 root_topic
+    # 渲染(render)所有节点并且计算各个节点的布局数据
+    @traverse_render root_topic
 
     # 第二次遍历：宽度优先遍历
     # 定位所有节点
-    root_topic.pos 0, 0
-    @_layout_r2 root_topic
 
-
-  ## TODO 重构
-  _layout_r1: (topic)->
-    # 如果不是一级子节点/根节点，根据父节点的 side 来为当前节点的 side 赋值
-    if topic.depth > 1
-      topic.side = topic.parent.side
-
-
-    # 如果是根节点，分成左右两侧计算布局数据
-    if topic.is_root()
-      topic.layout_left_children_height = 0
-      topic.layout_right_children_height = 0
-
-      topic.left_children_each (i, child)=>
-        @_layout_r1 child
-        topic.layout_left_children_height += child.layout_area_height + @TOPIC_Y_PADDING
-      topic.layout_left_children_height -= @TOPIC_Y_PADDING
-
-      topic.right_children_each (i, child)=>
-        @_layout_r1 child
-        topic.layout_right_children_height += child.layout_area_height + @TOPIC_Y_PADDING
-      topic.layout_right_children_height -= @TOPIC_Y_PADDING
-
-      topic.render()
-
-      return
+    # 根节点的中心位置是 0, 0
+    @traverse_pos root_topic
 
     
-    topic.layout_left_children_height  = 0
-    topic.layout_right_children_height = 0
+    # @_layout_r2 root_topic
+
+
+  traverse_render: (root_topic)->
+    # la = layout area
+    # la 包含以下属性
+    # la.height 当前区域高度（取节点高度和子节点高度中较大者）
+    # la.children_height 所有子节点区域高度
+    # la.children
+
+    root_topic.left_la = {}
+    root_topic.left_la.children_height = 0
+    root_topic.left_children_each (i, child)=>
+      @_layout_r1 child
+      root_topic.left_la.children_height += child.la.height + @TOPIC_Y_PADDING
+    root_topic.left_la.children_height -= @TOPIC_Y_PADDING
+
+    root_topic.right_la = {}
+    root_topic.right_la.children_height = 0
+    root_topic.right_children_each (i, child)=>
+      @_layout_r1 child
+      root_topic.right_la.children_height += child.la.height + @TOPIC_Y_PADDING
+    root_topic.right_la.children_height -= @TOPIC_Y_PADDING
+
+    root_topic.render()
+
+
+
+  _layout_r1: (topic)->
+    # 如果不是一级子节点/根节点，根据父节点的 side 来为当前节点的 side 赋值
+    topic.side = topic.parent.side if topic.depth > 1
+
+    la = {}
+    la.children_height = 0
     if topic.is_opened()
       for child in topic.children
         @_layout_r1 child
-        topic.layout_left_children_height  += child.layout_area_height + @TOPIC_Y_PADDING
-        topic.layout_right_children_height += child.layout_area_height + @TOPIC_Y_PADDING
+        la.children_height += child.la.height + @TOPIC_Y_PADDING
+      la.children_height -= @TOPIC_Y_PADDING
 
-      topic.layout_left_children_height  -= @TOPIC_Y_PADDING
-      topic.layout_right_children_height -= @TOPIC_Y_PADDING
+    topic.render()
+    la.height = Math.max topic.layout_height, la.children_height
+    topic.la = la
 
-    topic.render() # 生成 dom，同时计算 topic.layout_height
-    topic.layout_area_height = Math.max topic.layout_height, topic.layout_left_children_height
+
+
+  traverse_pos: (root_topic)->
+    # 根节点定位
+    # 根节点的中心位置是 0, 0
+    @pos root_topic, root_topic.layout_width / -2.0, root_topic.layout_height / -2.0
+
+    root_topic.left_la.children_top = root_topic.layout_y_center - root_topic.left_la.children_height / 2.0
+    root_topic.left_la.children_x_inside = root_topic.layout_left - @TOPIC_X_PADDING
+    t = root_topic.left_la.children_top
+    root_topic.left_children_each (i, child)=>
+      left = root_topic.left_la.children_x_inside - child.layout_width
+      top  = t + (child.la.height - child.layout_height) / 2.0
+      @pos child, left, top
+      @_layout_r2 child
+      t += child.la.height + @TOPIC_Y_PADDING
+
+    root_topic.right_la.children_top = root_topic.layout_y_center - root_topic.right_la.children_height / 2.0
+    root_topic.right_la.children_x_inside = root_topic.layout_right + @TOPIC_X_PADDING
+    t = root_topic.right_la.children_top
+    root_topic.right_children_each (i, child)=>
+      left = root_topic.right_la.children_x_inside
+      top  = t + (child.la.height - child.layout_height) / 2.0
+      @pos child, left, top
+      @_layout_r2 child
+      t += child.la.height + @TOPIC_Y_PADDING
 
 
   _layout_r2: (topic)->
-    mid_y = topic.layout_top + topic.layout_height / 2.0
-
-    # 左侧
-    topic.layout_left_children_top   = mid_y - topic.layout_left_children_height / 2.0
-    topic.layout_left_children_right = topic.layout_left - @TOPIC_X_PADDING
-
-    t = topic.layout_left_children_top
-    topic.left_children_each (i, child)=>
-      left = topic.layout_left_children_right - child.layout_width
-      top = t + (child.layout_area_height - child.layout_height) / 2.0
-      child.pos left, top
+    topic.la.children_top = topic.layout_y_center - topic.la.children_height / 2.0
+    if topic.side is 'left'
+      topic.la.children_x_inside = topic.layout_left - @TOPIC_X_PADDING
+    if topic.side is 'right'
+      topic.la.children_x_inside = topic.layout_right + @TOPIC_X_PADDING
+    t = topic.la.children_top
+    for child in topic.children
+      if topic.side is 'left'
+        left = topic.la.children_x_inside - child.layout_width
+      if topic.side is 'right'
+        left = topic.la.children_x_inside
+      top = t + (child.la.height - child.layout_height) / 2.0
+      @pos child, left, top
       @_layout_r2 child
+      t += child.la.height + @TOPIC_Y_PADDING
 
-      t += child.layout_area_height + @TOPIC_Y_PADDING
-
-
-    # 右侧
-    topic.layout_right_children_top  = mid_y - topic.layout_right_children_height / 2.0
-    topic.layout_right_children_left = topic.layout_left + topic.layout_width + @TOPIC_X_PADDING
-
-    t = topic.layout_right_children_top
-    topic.right_children_each (i, child)=>
-      left = topic.layout_right_children_left
-      top  = t + (child.layout_area_height - child.layout_height) / 2.0
-      child.pos left, top
-      @_layout_r2 child
-
-      t += child.layout_area_height + @TOPIC_Y_PADDING
 
   draw_lines: ->
     # console.log '开始画线'
@@ -114,13 +198,11 @@ class BasicLayout
       bottom_right = topic.layout_right_children_top + topic.layout_right_children_height # 右侧总高度
       bottom = Math.max bottom_left, bottom_right
 
-      # console.log left, right, top, bottom
-
     else
       # 左侧节点
       if topic.side is 'left'
         left  = topic.layout_left_children_right - 50 # 所有子节点的右边缘，向左偏移 50px
-        right = topic.layout_left + topic.layout_width # 当前节点的右边缘
+        right = topic.layout_right # 当前节点的右边缘
 
       # 右侧节点
       if topic.side is 'right'
@@ -154,105 +236,29 @@ class BasicLayout
 
     return ctx
 
-  _draw_line: (parent, child, ctx)->
-    # 在父子节点之间绘制连线
-    if parent.is_root()
-      @_draw_line_0 parent, child, ctx
-      return
 
-    # 其他非根节点，这里要区分左右
-    if parent.side is 'left'
-      @_draw_line_n_left parent, child, ctx
-    else if parent.side is 'right'
-      @_draw_line_n_right parent, child, ctx
-
-  # 在根节点上绘制曲线
-  _draw_line_0: (parent, child, ctx)->
-    # 绘制贝塞尔曲线
-    # 两个端点
-    # 父节点的中心点
-    x0 = parent.layout_left + parent.layout_width / 2.0
-    y0 = parent.layout_top  + parent.layout_height / 2.0
-
-    # 这里要区分左右子节点
-    if child.side is 'left'
-      # 子节点的右侧中点
-      x1 = child.layout_left + child.layout_width
-    if child.side is 'right'
-      # 子节点的左侧中点
-      x1 = child.layout_left
+  # 将节点定位到编辑器的指定相对位置
+  # 同时计算一些布局方法会用到的值
+  pos: (topic, left, top)->
+    topic.layout_left = left
+    topic.layout_top  = top
     
-    y1 = child.layout_top + child.layout_height / 2.0
+    topic.layout_right  = left + topic.layout_width
+    topic.layout_bottom = top  + topic.layout_height
 
-    # 两个控制点
-    if child.side is 'left'
-      xc1 = x0 - 30
-    if child.side is 'right'
-      xc1 = x0 + 30 
-    
-    yc1 = y0
+    topic.layout_x_center = left + topic.layout_width / 2.0
+    topic.layout_y_center = top  + topic.layout_height / 2.0
 
-    xc2 = (x0 + x1) / 2.0
-    yc2 = y1 
+    if topic.side is 'left'
+      topic.layout_x_inside = topic.layout_right
+      topic.layout_x_joint_outside = topic.layout_left - @JOINT_WIDTH
 
-    ctx.lineWidth = 2
-    ctx.strokeStyle = '#666'
+    if topic.side is 'right'
+      topic.layout_x_inside = topic.layout_left
+      topic.layout_x_joint_outside = topic.layout_right + @JOINT_WIDTH
 
-    ctx.beginPath()
-    ctx.moveTo x0, y0
-    ctx.bezierCurveTo xc1, yc1, xc2, yc2, x1, y1 
-    ctx.stroke()
-
-  _draw_line_n_left: (parent, child, ctx)->
-    # 绘制贝塞尔曲线
-    # 两个端点
-    # 父节点的左侧中点
-    x0 = parent.layout_left - @JOINT_WIDTH
-    y0 = parent.layout_top  + parent.layout_height / 2.0
-
-    # 子节点的右侧中点
-    x1 = child.layout_left + child.layout_width
-    y1 = child.layout_top + child.layout_height / 2.0
-
-    # 两个控制点
-    xc1 = (x0 + x1) / 2.0
-    yc1 = y0
-
-    xc2 = xc1
-    yc2 = y1
-
-    ctx.lineWidth = 2
-    ctx.strokeStyle = '#666'
-
-    ctx.beginPath()
-    ctx.moveTo x0, y0
-    ctx.bezierCurveTo xc1, yc1, xc2, yc2, x1, y1 
-    ctx.stroke()
-
-  _draw_line_n_right: (parent, child, ctx)->
-    # 绘制贝塞尔曲线
-    # 两个端点
-    # 父节点的右侧中点
-    x0 = parent.layout_left + parent.layout_width + @JOINT_WIDTH
-    y0 = parent.layout_top  + parent.layout_height / 2.0
-
-    # 子节点的左侧中点
-    x1 = child.layout_left
-    y1 = child.layout_top + child.layout_height / 2.0
-
-    # 两个控制点
-    xc1 = (x0 + x1) / 2.0
-    yc1 = y0
-
-    xc2 = xc1
-    yc2 = y1
-
-    ctx.lineWidth = 2
-    ctx.strokeStyle = '#666'
-
-    ctx.beginPath()
-    ctx.moveTo x0, y0
-    ctx.bezierCurveTo xc1, yc1, xc2, yc2, x1, y1 
-    ctx.stroke()
+    topic.$el.css
+      left: topic.layout_left
+      top: topic.layout_top
 
 window.BasicLayout = BasicLayout

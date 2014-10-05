@@ -168,6 +168,8 @@ jQuery(document).ready ->
 
   mindmap.layout()
 
+  window.mindmap = mindmap
+
 
 
   # 设置工具按钮操作事件

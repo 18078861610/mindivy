@@ -61,7 +61,9 @@ body.editor {
   .mindmap .topics-area {
     position: absolute;
     top: 50%;
-    left: 50%; }
+    left: 50%;
+    width: 100px;
+    height: 100px; }
     .mindmap .topics-area .topic {
       z-index: 1; }
     .mindmap .topics-area canvas {
@@ -73,11 +75,45 @@ body.editor {
       font-size: 0;
       background-color: #bde4fb;
       border: solid 3px transparent;
-      -webkit-transition: all 0.3s ease-out;
-      -moz-transition: all 0.3s ease-out;
-      -ms-transition: all 0.3s ease-out;
-      -o-transition: all 0.3s ease-out;
-      transition: all 0.3s ease-out; }
+      -webkit-transition: all 0.3s;
+      -moz-transition: all 0.3s;
+      -ms-transition: all 0.3s;
+      -o-transition: all 0.3s;
+      transition: all 0.3s; }
+      .mindmap .topics-area .topic.ondrag {
+        opacity: 0.4;
+        -webkit-transition: none;
+        -moz-transition: none;
+        -ms-transition: none;
+        -o-transition: none;
+        transition: none;
+        background-color: #FFE08B; }
+      .mindmap .topics-area .topic.will-drop-on {
+        background-color: #ff9999; }
+        .mindmap .topics-area .topic.will-drop-on:before {
+          content: "";
+          position: absolute;
+          height: 2px;
+          top: 50%;
+          margin-top: -1px;
+          width: 20px;
+          background-color: #ff9999; }
+        .mindmap .topics-area .topic.will-drop-on.right-side:before {
+          left: 100%; }
+        .mindmap .topics-area .topic.will-drop-on.left-side:before {
+          right: 100%; }
+        .mindmap .topics-area .topic.will-drop-on:after {
+          content: "";
+          position: absolute;
+          background-color: #ff9999;
+          top: 0;
+          bottom: 0;
+          border-radius: 4px;
+          width: 80px; }
+        .mindmap .topics-area .topic.will-drop-on.right-side:after {
+          left: calc(100% + 20px); }
+        .mindmap .topics-area .topic.will-drop-on.left-side:after {
+          right: calc(100% + 20px); }
       .mindmap .topics-area .topic:hover {
         border-color: rgba(0, 0, 0, 0.4); }
       .mindmap .topics-area .topic.active {
@@ -197,6 +233,11 @@ body.editor {
     .mindmap .topics-area canvas {
       position: absolute;
       pointer-events: none; }
+    .mindmap .topics-area .drag-placeholder {
+      pointer-events: none;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 4px;
+      position: absolute; }
   .mindmap .image-dialog-overlay {
     position: absolute;
     top: 0;
