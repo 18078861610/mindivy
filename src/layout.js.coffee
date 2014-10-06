@@ -69,6 +69,7 @@ class BasicLayout extends Module
     @TOPIC_X_PADDING = 30
     @JOINT_WIDTH = 16 # 折叠点的宽度
 
+
   go: ->
     root_topic = @mindmap.root_topic
 
@@ -76,14 +77,13 @@ class BasicLayout extends Module
     # 渲染(render)所有节点并且计算各个节点的布局数据
     @traverse_render root_topic
 
+    # 根节点定位
+    # 根节点的中心位置是 0, 0
+    @pos root_topic, root_topic.layout_width / -2.0, root_topic.layout_height / -2.0
+
     # 第二次遍历：宽度优先遍历
     # 定位所有节点
-
-    # 根节点的中心位置是 0, 0
     @traverse_pos root_topic
-
-    
-    # @_layout_r2 root_topic
 
 
   traverse_render: (topic)->
@@ -96,6 +96,7 @@ class BasicLayout extends Module
       @_calc_layout_area topic, 'right_'
     else
       @_calc_layout_area topic, ''
+
 
   _calc_layout_area: (topic, prefix)->
     # la = layout area
@@ -113,46 +114,29 @@ class BasicLayout extends Module
     topic["#{prefix}la"] = la
 
 
+  traverse_pos: (topic)->
+    if topic.is_root()
+      @_calc_pos topic, 'left_'
+      @_calc_pos topic, 'right_'
+    else
+      @_calc_pos topic, ''
 
-  traverse_pos: (root_topic)->
-    # 根节点定位
-    # 根节点的中心位置是 0, 0
-    @pos root_topic, root_topic.layout_width / -2.0, root_topic.layout_height / -2.0
 
-    root_topic.left_la.children_top = root_topic.layout_y_center - root_topic.left_la.children_height / 2.0
-    root_topic.left_la.children_x_inside = root_topic.layout_left - @TOPIC_X_PADDING
-    t = root_topic.left_la.children_top
-    root_topic.left_children_each (i, child)=>
-      left = root_topic.left_la.children_x_inside - child.layout_width
+  _calc_pos: (topic, prefix)->
+    la = topic["#{prefix}la"]
+
+    la.children_top = topic.layout_y_center - la.children_height / 2.0
+    t = la.children_top
+    topic["#{prefix}children_each"] (i, child)=>
+
+      if child.side is 'left'
+        left = topic.layout_left - @TOPIC_X_PADDING - child.layout_width
+      if child.side is 'right'
+        left = topic.layout_right + @TOPIC_X_PADDING
+
       top  = t + (child.la.height - child.layout_height) / 2.0
       @pos child, left, top
-      @_layout_r2 child
-      t += child.la.height + @TOPIC_Y_PADDING
-
-    root_topic.right_la.children_top = root_topic.layout_y_center - root_topic.right_la.children_height / 2.0
-    root_topic.right_la.children_x_inside = root_topic.layout_right + @TOPIC_X_PADDING
-    t = root_topic.right_la.children_top
-    root_topic.right_children_each (i, child)=>
-      left = root_topic.right_la.children_x_inside
-      top  = t + (child.la.height - child.layout_height) / 2.0
-      @pos child, left, top
-      @_layout_r2 child
-      t += child.la.height + @TOPIC_Y_PADDING
-
-
-  _layout_r2: (topic)->
-    topic.la.children_top = topic.layout_y_center - topic.la.children_height / 2.0
-    t = topic.la.children_top
-    for child in topic.children
-
-      if topic.side is 'left'
-        left = topic.layout_children_x_inside - child.layout_width
-      if topic.side is 'right'
-        left = topic.layout_children_x_inside
-      
-      top = t + (child.la.height - child.layout_height) / 2.0
-      @pos child, left, top
-      @_layout_r2 child
+      @traverse_pos child
       t += child.la.height + @TOPIC_Y_PADDING
 
 
@@ -235,12 +219,10 @@ class BasicLayout extends Module
     if topic.side is 'left'
       topic.layout_x_inside = topic.layout_right
       topic.layout_x_joint_outside = topic.layout_left - @JOINT_WIDTH
-      topic.layout_children_x_inside = topic.layout_left - @TOPIC_X_PADDING
 
     if topic.side is 'right'
       topic.layout_x_inside = topic.layout_left
       topic.layout_x_joint_outside = topic.layout_right + @JOINT_WIDTH
-      topic.layout_children_x_inside = topic.layout_right + @TOPIC_X_PADDING
 
     topic.$el.css
       left: topic.layout_left
