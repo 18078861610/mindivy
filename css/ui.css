@@ -237,7 +237,8 @@ body.editor {
       pointer-events: none;
       background-color: rgba(0, 0, 0, 0.5);
       border-radius: 4px;
-      position: absolute; }
+      position: absolute;
+      z-index: 5; }
   .mindmap .image-dialog-overlay {
     position: absolute;
     top: 0;

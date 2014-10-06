@@ -154,6 +154,11 @@ class BasicLayout extends Module
         @_draw_line topic, child, ctx
         @_d_r child
 
+    else
+      # 如果没有子节点，把 canvas 图层移除掉
+      topic.$canvas.remove() if topic.$canvas
+
+
   _init_canvas_on: (topic)->
     # 根节点
     if topic.is_root()

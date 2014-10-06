@@ -397,10 +397,10 @@ class Topic extends Module
       @$el.addClass 'opened'
 
     @oc_fsm.onleaveopened = =>
-      @$el.removeClass 'opened'
+      @$el.removeClass 'opened' if @$el
 
     @oc_fsm.onenterclosed = =>
-      @$el.addClass 'closed'
+      @$el.addClass 'closed' if @$el
 
     @oc_fsm.onleaveclosed = =>
       @$el.removeClass 'closed'
@@ -414,7 +414,7 @@ class Topic extends Module
         _open_r child
 
     @oc_fsm.onbeforeopen = =>
-      console.log '展开子节点'
+      # console.log '展开子节点'
       @$canvas.show()
       _open_r @
 
@@ -430,8 +430,8 @@ class Topic extends Module
         _close_r child
 
     @oc_fsm.onbeforeclose = =>
-      console.log '折叠子节点'
-      @$canvas.hide()
+      # console.log '折叠子节点'
+      @$canvas.hide() if @$canvas
       _close_r @
 
 
@@ -503,8 +503,15 @@ class Topic extends Module
       if @flash
         @flash_animate()
 
-      # TODO 换用 jquery.event.drag 库重新实现
-      # @bind_drag_event()
+      if not @is_root()
+        @bind_drag_event()
+
+    # 根据折叠展开状态调整样式
+    if not @is_root()
+      if @is_closed()
+        @$el.removeClass('opened').addClass('closed')
+      else
+        @$el.removeClass('closed').addClass('opened')
 
     # 标记叶子节点
     if @has_children()
@@ -538,73 +545,81 @@ class Topic extends Module
 
   # 绑定拖拽事件
   bind_drag_event: ->
-    @$el.drag 'options', {
-      ondragbefore: (evt)=>
-        @drag_begin_screenX = evt.screenX
-        @drag_begin_screenY = evt.screenY
+    @$el.drag 'start', (evt, dd)=>
+      mindmap_offset = @mindmap.$topics_area.offset()
+      mindmap_offsetX = mindmap_offset.left
+      mindmap_offsetY = mindmap_offset.top
 
-        @mouse_beginX = @layout_left + evt.offsetX
-        @mouse_beginY = @layout_top  + evt.offsetY
+      offsetX = dd.offsetX
+      offsetY = dd.offsetY
 
-        @$el.addClass 'ondrag'
-        @$drag_placeholder = jQuery '<div>'
-          .addClass 'drag-placeholder'
-          .css
-            'left'  : @layout_left
-            'top'   : @layout_top
-            'width' : @layout_width
-            'height': @layout_height
-          .appendTo @mindmap.$topics_area
+      startX = dd.startX
+      startY = dd.startY
 
-        # 计算所有节点的拖拽触发区域
-        @_calc_drag_trigger_area_r @mindmap.root_topic
+      @dom_beginX = offsetX - mindmap_offsetX
+      @dom_beginY = offsetY - mindmap_offsetY
+
+      @mouse_beginX = startX - mindmap_offsetX
+      @mouse_beginY = startY - mindmap_offsetY
+
+      # console.log @dom_beginX, @dom_beginY, @mouse_beginX, @mouse_beginY
+
+      @$el.addClass 'ondrag'
+      @$drag_placeholder = jQuery '<div>'
+        .addClass 'drag-placeholder'
+        .css
+          'left'  : @layout_left
+          'top'   : @layout_top
+          'width' : @layout_width
+          'height': @layout_height
+        .appendTo @mindmap.$topics_area
 
 
-      # 拖拽中回调
-      # this: drag element
-      # arg0: event
-      # arg1: instance
-      ondrag: (evt, instance)=>
-        deltaX = evt.screenX - @drag_begin_screenX
-        deltaY = evt.screenY - @drag_begin_screenY
+      # 计算所有节点的拖拽触发区域
+      @_calc_drag_trigger_area_r @mindmap.root_topic
 
-        mouseX = @mouse_beginX + deltaX
-        mouseY = @mouse_beginY + deltaY
+    , { distance: 20 }
 
-        # console.log mouseX, mouseY
-        
-        # # console.log "X方向移动距离：#{deltaX}, Y方向移动距离：#{deltaY}"
 
-        Topic.each (id, topic)=>
-          return if topic.is_root()
-          return if @ is topic
-          return if @is_ancestor_of(topic)
+    @$el.drag (evt, dd)=>
+      mouseX = @mouse_beginX + dd.deltaX
+      mouseY = @mouse_beginY + dd.deltaY
 
-          if topic.drag_trigger_area_child.is_contain mouseX, mouseY
-            @_show_will_drop_on(topic)
-          else
-            @_hide_will_drop_on(topic)
+      domX = @dom_beginX + dd.deltaX
+      domY = @dom_beginY + dd.deltaY
 
-      ondragend: (evt, instance)=>
-        @$el.removeClass 'ondrag'
-        @$drag_placeholder.remove()
+      @$drag_placeholder
+        .css
+          'left': domX
+          'top': domY
 
-        deltaX = evt.screenX - @drag_begin_screenX
-        deltaY = evt.screenY - @drag_begin_screenY
+      Topic.each (id, topic)=>
+        return if topic.is_root()
+        return if @ is topic
+        return if @is_ancestor_of(topic)
 
-        mouseX = @mouse_beginX + deltaX
-        mouseY = @mouse_beginY + deltaY
+        if topic.drag_trigger_area_child.is_contain mouseX, mouseY
+          @_show_will_drop_on(topic)
+        else
+          @_hide_will_drop_on(topic)
 
-        # TODO 重构
-        Topic.each (id, topic)=>
 
-          return if topic.is_root()
-          return if @ is topic
-          return if @is_ancestor_of(topic)
+    @$el.drag 'end', (evt, dd)=>
+      mouseX = @mouse_beginX + dd.deltaX
+      mouseY = @mouse_beginY + dd.deltaY
 
-          if topic.drag_trigger_area_child.is_contain mouseX, mouseY
-            @move_to_child_of topic
-    }
+      @$el.removeClass 'ondrag'
+      @$drag_placeholder.remove()
+
+      # TODO 重构
+      Topic.each (id, topic)=>
+        return if topic.is_root()
+        return if @ is topic
+        return if @is_ancestor_of(topic)
+
+        if topic.drag_trigger_area_child.is_contain mouseX, mouseY
+          @move_to_child_of topic
+
 
   # 拖拽中显示将要放置子节点的提示信息
   _show_will_drop_on: (topic)->

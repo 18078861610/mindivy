@@ -1,6 +1,7 @@
 JSONInstanceMethods = 
   to_json: ->
-    JSON.stringify @data(@root_topic)
+    obj = @data(@root_topic)
+    JSON.stringify obj
 
 
   data: (topic)->
@@ -17,6 +18,7 @@ JSONInstanceMethods =
       img_url: topic.img_url
       children: topic.children.map (child)=> @data child
       side: topic.side
+      is_closed: topic.is_closed()
     }
 
 
@@ -43,6 +45,9 @@ JSONClassMethods =
       child_topic.img_url = child_data.img_url
       child_topic.side    = child_data.side
 
+      # if child_data.is_closed
+      #   child_topic.oc_fsm.close()
+
       @_r child_topic, child_data
 
 
@@ -65,11 +70,13 @@ class Mindmap extends Module
   # 增加或修改节点后调用此方法
   # 并且触发本地自动保存
   layout: ->
+    # 本地自动保存
+    @save_local()
+
+    # 布局
     @basic_layout.go()
     @basic_layout.draw_lines()
 
-    # 本地自动保存
-    @save_local()
 
   save_local: ->
     json = @to_json()
@@ -266,7 +273,7 @@ jQuery(document).ready ->
   # mindmap = prepare_mindmap mindmap
   # json_to_mindmap()
   if json = localStorage['mindmap']
-    console.log json
+    # console.log json
     mindmap = Mindmap.from_json json
     mindmap.layout()
     bind_events mindmap
