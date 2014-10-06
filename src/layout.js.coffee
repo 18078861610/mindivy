@@ -157,27 +157,30 @@ class BasicLayout extends Module
   _init_canvas_on: (topic)->
     # 根节点
     if topic.is_root()
-      left  = topic.layout_left_children_right - 50 # 左侧子节点的右边缘，向左偏移 50px
-      right = topic.layout_right_children_left + 50 # 右侧子节点的左边缘，向右偏移 50px
+      left  = topic.layout_left - @TOPIC_X_PADDING - 50 # 根节点的左边缘，向左偏移
+      right = topic.layout_right + @TOPIC_X_PADDING + 50 # 根节点的右边缘，向右偏移
 
-      top = Math.min topic.layout_left_children_top, topic.layout_right_children_top # 所有子节点的上边缘
-      bottom_left  = topic.layout_left_children_top + topic.layout_left_children_height # 左侧总高度
-      bottom_right = topic.layout_right_children_top + topic.layout_right_children_height # 右侧总高度
+      lla = topic.left_la
+      rla = topic.right_la
+
+      top = Math.min lla.children_top, rla.children_top # 所有子节点的上边缘
+      bottom_left  = lla.children_top + lla.children_height # 左侧底部
+      bottom_right = rla.children_top + rla.children_height # 右侧底部
       bottom = Math.max bottom_left, bottom_right
 
     else
       # 左侧节点
       if topic.side is 'left'
-        left  = topic.layout_left_children_right - 50 # 所有子节点的右边缘，向左偏移 50px
+        left  = topic.layout_left - @TOPIC_X_PADDING - 50 # 节点的左边缘，向左偏移
         right = topic.layout_right # 当前节点的右边缘
 
       # 右侧节点
       if topic.side is 'right'
         left  = topic.layout_left # 当前节点的左边缘
-        right = topic.layout_right_children_left + 50 # 所有子节点的左边缘，向右偏移 50px
+        right = topic.layout_right + @TOPIC_X_PADDING + 50 # 节点的右边缘，向右偏移
 
-      top    = topic.layout_left_children_top # 所有子节点的上边缘
-      bottom = top + topic.layout_left_children_height # 所有子节点的下边缘
+      top    = topic.la.children_top # 所有子节点的上边缘
+      bottom = top + topic.la.children_height # 所有子节点的下边缘
 
     # 计算 canvas 区域宽高
     width  = right - left
