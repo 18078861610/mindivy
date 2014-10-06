@@ -503,6 +503,7 @@ class Topic extends Module
       if @flash
         @flash_animate()
 
+      # TODO 换用 jquery.event.drag 库重新实现
       # @bind_drag_event()
 
     # 标记叶子节点
