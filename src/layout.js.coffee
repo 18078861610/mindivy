@@ -86,46 +86,31 @@ class BasicLayout extends Module
     # @_layout_r2 root_topic
 
 
-  traverse_render: (root_topic)->
+  traverse_render: (topic)->
+    # 如果不是一级子节点/根节点，根据父节点的 side 来为当前节点的 side 赋值
+    topic.side = topic.parent.side if topic.depth > 1
+    topic.render()
+
+    if topic.is_root()
+      @_calc_layout_area topic, 'left_'
+      @_calc_layout_area topic, 'right_'
+    else
+      @_calc_layout_area topic, ''
+
+  _calc_layout_area: (topic, prefix)->
     # la = layout area
     # la 包含以下属性
     # la.height 当前区域高度（取节点高度和子节点高度中较大者）
     # la.children_height 所有子节点区域高度
     # la.children
 
-    root_topic.left_la = {}
-    root_topic.left_la.children_height = 0
-    root_topic.left_children_each (i, child)=>
-      @_layout_r1 child
-      root_topic.left_la.children_height += child.la.height + @TOPIC_Y_PADDING
-    root_topic.left_la.children_height -= @TOPIC_Y_PADDING
-
-    root_topic.right_la = {}
-    root_topic.right_la.children_height = 0
-    root_topic.right_children_each (i, child)=>
-      @_layout_r1 child
-      root_topic.right_la.children_height += child.la.height + @TOPIC_Y_PADDING
-    root_topic.right_la.children_height -= @TOPIC_Y_PADDING
-
-    root_topic.render()
-
-
-
-  _layout_r1: (topic)->
-    # 如果不是一级子节点/根节点，根据父节点的 side 来为当前节点的 side 赋值
-    topic.side = topic.parent.side if topic.depth > 1
-
-    la = {}
-    la.children_height = 0
+    la = { children_height: -@TOPIC_Y_PADDING }
     if topic.is_opened()
-      for child in topic.children
-        @_layout_r1 child
+      topic["#{prefix}children_each"] (i, child)=>
+        @traverse_render child
         la.children_height += child.la.height + @TOPIC_Y_PADDING
-      la.children_height -= @TOPIC_Y_PADDING
-
-    topic.render()
     la.height = Math.max topic.layout_height, la.children_height
-    topic.la = la
+    topic["#{prefix}la"] = la
 
 
 
@@ -157,16 +142,14 @@ class BasicLayout extends Module
 
   _layout_r2: (topic)->
     topic.la.children_top = topic.layout_y_center - topic.la.children_height / 2.0
-    if topic.side is 'left'
-      topic.la.children_x_inside = topic.layout_left - @TOPIC_X_PADDING
-    if topic.side is 'right'
-      topic.la.children_x_inside = topic.layout_right + @TOPIC_X_PADDING
     t = topic.la.children_top
     for child in topic.children
+
       if topic.side is 'left'
-        left = topic.la.children_x_inside - child.layout_width
+        left = topic.layout_children_x_inside - child.layout_width
       if topic.side is 'right'
-        left = topic.la.children_x_inside
+        left = topic.layout_children_x_inside
+      
       top = t + (child.la.height - child.layout_height) / 2.0
       @pos child, left, top
       @_layout_r2 child
@@ -252,10 +235,12 @@ class BasicLayout extends Module
     if topic.side is 'left'
       topic.layout_x_inside = topic.layout_right
       topic.layout_x_joint_outside = topic.layout_left - @JOINT_WIDTH
+      topic.layout_children_x_inside = topic.layout_left - @TOPIC_X_PADDING
 
     if topic.side is 'right'
       topic.layout_x_inside = topic.layout_left
       topic.layout_x_joint_outside = topic.layout_right + @JOINT_WIDTH
+      topic.layout_children_x_inside = topic.layout_right + @TOPIC_X_PADDING
 
     topic.$el.css
       left: topic.layout_left

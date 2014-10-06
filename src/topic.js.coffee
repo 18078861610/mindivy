@@ -266,6 +266,12 @@ ModuleTopicNav =
     for child in @children
       func(i++, child) if child.side is 'right'
 
+  # 对所有子节点进行遍历操作
+  children_each: (func)->
+    i = 0
+    for child in @children
+      func(i++, child)
+
 
   # 判断当前节点是否是传入的 topic 的祖先 
   is_ancestor_of: (topic)->
@@ -279,9 +285,11 @@ ModuleTopicNav =
 
 ModuleTopicState =
   is_opened: ->
+    return true if @is_root()
     return @oc_fsm.is 'opened'
 
   is_closed: ->
+    return false if @is_root()
     return @oc_fsm.is 'closed'
 
 
