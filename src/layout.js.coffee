@@ -1,3 +1,85 @@
+# 线型：渐细贝塞尔曲线
+class TaperOffBezierCurve
+  @draw_root: (ctx, x0, y0, x1, y1, color, line_width)->
+    t = new TaperOffBezierCurve ctx, x0, y0, x1, y1, color, line_width
+    t._draw_root()
+
+  @draw: (ctx, x0, y0, x1, y1, color, line_width)->
+    t = new TaperOffBezierCurve ctx, x0, y0, x1, y1, color, line_width
+    t._draw()
+
+  constructor: (@ctx, @x0, @y0, @x1, @y1, @color = '#666', @line_width = 6)->
+    @ctx.lineWidth = 0.2
+    @ctx.strokeStyle = @color
+    @ctx.fillStyle = @color
+
+    curve_width = @line_width
+    o = curve_width / 2.0
+
+    dx = @x1 - @x0
+    dy = @y0 - @y1
+    distance = Math.sqrt dx * dx + dy * dy
+
+    @offx = o * dy / distance
+    @offy = o * dx / distance
+
+  _draw_root: ->
+    @root_off = 40
+
+    @ctx.beginPath()
+    @_bezier0_root @x0 - @offx, @y0 - @offy, @x1, @y1
+    @_bezier1_root @x0 + @offx, @y0 + @offy, @x1, @y1
+    @ctx.stroke()
+    @ctx.fill()
+
+  _draw: ->
+    @ctx.beginPath()
+    @_bezier0 @x0 - @offx, @y0 - @offy, @x1, @y1
+    @_bezier1 @x0 + @offx, @y0 + @offy, @x1, @y1
+    @ctx.stroke()
+    @ctx.fill()
+
+  _bezier0_root: (x0, y0, x1, y1)->
+    xc1 = x0 + @root_off if x1 > x0
+    xc1 = x0 - @root_off if x1 < x0
+    yc1 = y0
+
+    xc2 = (x0 + x1) / 2.0
+    yc2 = y1
+
+    @ctx.moveTo x0, y0
+    @ctx.bezierCurveTo xc1, yc1, xc2, yc2, x1, y1
+
+  _bezier1_root: (x0, y0, x1, y1)->
+    xc1 = x0 + @root_off if x1 > x0
+    xc1 = x0 - @root_off if x1 < x0
+    yc1 = y0
+
+    xc2 = (x0 + x1) / 2.0
+    yc2 = y1
+
+    @ctx.bezierCurveTo xc2, yc2, xc1, yc1, x0, y0
+
+  _bezier0: (x0, y0, x1, y1)->
+    xc1 = (x0 + x1) / 2.0
+    yc1 = y0
+
+    xc2 = xc1
+    yc2 = y1
+
+    @ctx.moveTo x0, y0
+    @ctx.bezierCurveTo xc1, yc1, xc2, yc2, x1, y1
+
+  _bezier1: (x0, y0, x1, y1)->
+    xc1 = (x0 + x1) / 2.0
+    yc1 = y0
+
+    xc2 = xc1
+    yc2 = y1
+
+    @ctx.bezierCurveTo xc2, yc2, xc1, yc1, x0, y0
+
+
 BasicLayoutDrawLineMethods = 
   _draw_line: (parent, child, ctx)->
     # 在父子节点之间绘制连线
@@ -16,22 +98,7 @@ BasicLayoutDrawLineMethods =
     x1 = child.layout_x_inside
     y1 = child.layout_y_center
 
-    # 两个贝塞尔曲线控制点
-    xc1 = x0 - 30 if child.side is 'left'
-    xc1 = x0 + 30 if child.side is 'right'
-    
-    yc1 = y0
-
-    xc2 = (x0 + x1) / 2.0
-    yc2 = y1 
-
-    ctx.lineWidth = 2
-    ctx.strokeStyle = '#777'
-
-    ctx.beginPath()
-    ctx.moveTo x0, y0
-    ctx.bezierCurveTo xc1, yc1, xc2, yc2, x1, y1 
-    ctx.stroke()
+    TaperOffBezierCurve.draw_root ctx, x0, y0, x1, y1, '#666', 6
 
   _draw_line_n: (parent, child, ctx)->
     # 绘制贝塞尔曲线
@@ -44,21 +111,7 @@ BasicLayoutDrawLineMethods =
     x1 = child.layout_x_inside
     y1 = child.layout_y_center
 
-    # 两个贝塞尔曲线控制点
-    xc1 = (x0 + x1) / 2.0
-    yc1 = y0
-
-    xc2 = xc1
-    yc2 = y1
-
-    ctx.lineWidth = 2
-    ctx.strokeStyle = '#777'
-
-    ctx.beginPath()
-    ctx.moveTo x0, y0
-    ctx.bezierCurveTo xc1, yc1, xc2, yc2, x1, y1 
-    ctx.stroke()
-
+    TaperOffBezierCurve.draw ctx, x0, y0, x1, y1, '#666', 4
 
 
 class BasicLayout extends Module
@@ -66,7 +119,7 @@ class BasicLayout extends Module
 
   constructor: (@mindmap)->
     @TOPIC_Y_PADDING = 10
-    @TOPIC_X_PADDING = 30
+    @TOPIC_X_PADDING = 50
     @JOINT_WIDTH = 16 # 折叠点的宽度
 
 
@@ -79,7 +132,8 @@ class BasicLayout extends Module
 
     # 根节点定位
     # 根节点的中心位置是 0, 0
-    @pos root_topic, root_topic.layout_width / -2.0, root_topic.layout_height / -2.0
+    @pos root_topic, ~~(root_topic.layout_width / -2.0), ~~(root_topic.layout_height / -2.0)
+    # @pos root_topic, 0, 0
 
     # 第二次遍历：宽度优先遍历
     # 定位所有节点

@@ -244,7 +244,7 @@ prepare_mindmap = ->
 # 通过读入JSON字符串初始化思维导图
 json_to_mindmap = ->
   jQuery.ajax
-    url: '/fixture/2.json'
+    url: '../fixture/2.json?' + Math.random()
     type: 'GET'
     success: (string)->
       mindmap = Mindmap.from_json string
@@ -272,7 +272,7 @@ bind_events = (mindmap)->
 jQuery(document).ready ->
   # mindmap = prepare_mindmap mindmap
   # json_to_mindmap()
-  if json = localStorage['mindmap']
+  if false #json = localStorage['mindmap']
     # console.log json
     mindmap = Mindmap.from_json json
     mindmap.layout()
