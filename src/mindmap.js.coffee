@@ -7,14 +7,14 @@ JSONInstanceMethods =
   data: (topic)->
     if topic.is_root()
       return {
-        text: topic.text
+        text: escape(topic.text)
         img_url: topic.img_url
         children: topic.children.map (child)=> @data child
         is_root: true
       }
 
     return {
-      text: topic.text
+      text: escape(topic.text)
       img_url: topic.img_url
       children: topic.children.map (child)=> @data child
       side: topic.side
@@ -246,11 +246,17 @@ json_to_mindmap = ->
   jQuery.ajax
     url: '../fixture/2.json?' + Math.random()
     type: 'GET'
+    contentType: "application/json; charset=utf-8"
     success: (string)->
       mindmap = Mindmap.from_json string
       mindmap.layout()
       bind_events mindmap
-      
+
+read_textarea = ->
+  string = jQuery('textarea.data').val()
+  mindmap = Mindmap.from_json string
+  mindmap.layout()
+  bind_events mindmap  
 
 bind_events = (mindmap)->
   window.mindmap = mindmap
@@ -278,7 +284,8 @@ jQuery(document).ready ->
     mindmap.layout()
     bind_events mindmap
   else
-    json_to_mindmap()
+    # json_to_mindmap()
+    read_textarea()
 
 
 window.Mindmap = Mindmap
