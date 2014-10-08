@@ -293,6 +293,36 @@ ModuleTopicState =
     return @oc_fsm.is 'closed'
 
 
+ModuleTopicDistance =
+  # 和编辑区下边缘的距离
+  distance_of_bottom: ->
+    # 节点的 bottom
+    bottom1 = @$el.offset().top + @layout_height
+    # 编辑区域的 bottom
+    bottom2 = @mindmap.$bottom_area.offset().top + @mindmap.$bottom_area.height()
+    return bottom2 - bottom1
+
+
+  # 和编辑区上边缘的距离
+  distance_of_top: ->
+    top1 = @$el.offset().top
+    top2 = @mindmap.$bottom_area.offset().top
+    return top1 - top2
+
+
+  # 和编辑区左边缘的距离
+  distance_of_left: ->
+    left1 = @$el.offset().left
+    left2 = @mindmap.$bottom_area.offset().left
+    return left1 - left2
+
+  # 和编辑区下边缘的距离
+  distance_of_right: ->
+    right1 = @$el.offset().left + @layout_width
+    right2 = @mindmap.$bottom_area.offset().left + @mindmap.$bottom_area.width()
+    return right2 - right1
+
+
 class Area
   constructor: (@left, @right, @top, @bottom)->
     #.. .
@@ -308,6 +338,7 @@ class Area
 class Topic extends Module
   @include ModuleTopicNav
   @include ModuleTopicState
+  @include ModuleTopicDistance
 
   @HASH: {}
 
@@ -361,6 +392,35 @@ class Topic extends Module
 
       @mindmap.active_topic = @
       @$el.addClass('active')
+      
+
+      dt = @distance_of_top()
+      db = @distance_of_bottom()
+      dl = @distance_of_left()
+      dr = @distance_of_right()
+
+
+      console.log "距离上：#{dt}"
+      console.log "距离下：#{db}"
+      console.log "距离左：#{dl}"
+      console.log "距离右：#{dr}"
+
+      if dr < 0
+        xmove = dr - 10
+
+      if dl < 0
+        xmove = - dl + 10
+
+      if dt < 0
+        ymove = - dt + 10
+
+      if db < 0
+        ymove = db - 10
+
+      @mindmap.move(xmove, ymove)
+
+
+
 
     @fsm.onbeforeunselect = =>
       @mindmap.active_topic = null
@@ -407,7 +467,10 @@ class Topic extends Module
 
     _open_r = (topic)=>
       for child in topic.children
-        child.$el.show()
+        # child.$el.show()
+        child.$el.removeClass 'closing'
+        child.$el.css
+          'opacity': 1
         
         continue if child.is_closed()
         child.$canvas.show() if child.$canvas
@@ -420,7 +483,14 @@ class Topic extends Module
 
     _close_r = (topic)=>
       for child in topic.children
-        child.$el.hide()
+        # child.$el.hide()
+        child.$el.addClass 'closing'
+        child.$el.css
+          'opacity': 0
+          'left': @layout_left
+          'top': @layout_top
+
+
         # 当节点被折叠时，解除 active 状态
         child.fsm.stop_edit() if child.fsm.can 'stop_edit'
         child.fsm.unselect() if child.fsm.can 'unselect'

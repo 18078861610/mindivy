@@ -115,14 +115,8 @@ class ContextMenu
   show_on: (topic)->
     # 计算节点下边缘到编辑区域底端的距离，便于确定菜单显示的方向
     # 是向上，还是向下
-
-    # 节点的 bottom
-    bottom1 = topic.$el.offset().top + topic.layout_height
-    # 编辑区域的 bottom
-    bottom2 = @mindmap.$bottom_area.offset().top + @mindmap.$bottom_area.height()
-
     # 节点距离编辑区底边的距离长度
-    distance = bottom2 - bottom1
+    distance = topic.distance_of_bottom()
 
     if distance >= @MENU_HEIGHT
       left = topic.layout_left
@@ -187,6 +181,21 @@ class Mindmap extends Module
 
   # 使得指定的节点在编辑器界面内居中显示
   center_to: (topic, is_animate)->
+
+
+  # 整体移动
+  # 参数： x 和 y 方向移动的距离
+  move: (xmove, ymove)->
+    @$topics_area
+      .addClass 'with-animate'
+      .css
+        'margin-left': "+=#{xmove}"
+        'margin-top': "+=#{ymove}"
+
+    setTimeout =>
+      @$topics_area
+        .removeClass 'with-animate'
+    , 300
 
 
   # 在选择的节点上新增子节点

@@ -108,6 +108,10 @@ body.editor {
     left:50%;
     width:100px;height:100px;
 
+    &.with-animate {
+      @include transition(all .3s);
+    }
+
     .topic {z-index:1;}
     canvas {z-index:0;}
 
@@ -266,6 +270,11 @@ body.editor {
           top:3px;left:6px;
           background-color:#fff;
         }
+      }
+
+      &.closing {
+        pointer-events:none;
+        @include transition(all .5s);
       }
 
 

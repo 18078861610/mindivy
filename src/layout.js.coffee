@@ -139,6 +139,12 @@ class BasicLayout extends Module
     # 定位所有节点
     @traverse_pos root_topic
 
+    # 第三次遍历：线性
+    Topic.each (id, topic)->
+      if not topic.$el.hasClass 'closing'
+        topic.$el.css
+          left: topic.layout_left
+          top: topic.layout_top
 
   traverse_render: (topic)->
     # 如果不是一级子节点/根节点，根据父节点的 side 来为当前节点的 side 赋值
@@ -286,8 +292,9 @@ class BasicLayout extends Module
       topic.layout_x_inside = topic.layout_left
       topic.layout_x_joint_outside = topic.layout_right + @JOINT_WIDTH
 
-    topic.$el.css
-      left: topic.layout_left
-      top: topic.layout_top
+    # 此时先不进行实际的位置变化，最后一次遍历中再进行
+    # topic.$el.css
+    #   left: topic.layout_left
+    #   top: topic.layout_top
 
 window.BasicLayout = BasicLayout
