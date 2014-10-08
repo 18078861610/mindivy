@@ -53,6 +53,8 @@ JSONClassMethods =
 
 class ContextMenu
   constructor: (@mindmap)->
+    @MENU_HEIGHT = 168 # 菜单 dom 高度
+
     @init_dom()
     @bind_events()
 
@@ -111,10 +113,30 @@ class ContextMenu
 
 
   show_on: (topic)->
-    left = topic.layout_left
-    top  = topic.layout_top + topic.layout_height
+    # 计算节点下边缘到编辑区域底端的距离，便于确定菜单显示的方向
+    # 是向上，还是向下
+
+    # 节点的 bottom
+    bottom1 = topic.$el.offset().top + topic.layout_height
+    # 编辑区域的 bottom
+    bottom2 = @mindmap.$bottom_area.offset().top + @mindmap.$bottom_area.height()
+
+    # 节点距离编辑区底边的距离长度
+    distance = bottom2 - bottom1
+
+    if distance >= @MENU_HEIGHT
+      left = topic.layout_left
+      top  = topic.layout_top + topic.layout_height
+      klass = 'down'
+    else
+      left = topic.layout_left
+      top  = topic.layout_top - @MENU_HEIGHT
+      klass = 'up'
 
     @$el
+      .removeClass 'up'
+      .removeClass 'down'
+      .addClass klass
       .css
         'left': left
         'top': top
@@ -273,7 +295,7 @@ class Mindmap extends Module
       @dom_beginX = mindmap_offsetX
       @dom_beginY = mindmap_offsetY
 
-      console.log @dom_beginX, @dom_beginY
+      # console.log @dom_beginX, @dom_beginY
 
     , { distance: 10 }
 

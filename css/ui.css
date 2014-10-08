@@ -2034,3 +2034,17 @@ body.editor {
         margin-right: 10px;
         width: 20px;
         text-align: center; }
+    .mindmap .mindmap-context-menu.up {
+      margin-top: -12px;
+      padding-top: 0px;
+      padding-bottom: 5px; }
+      .mindmap .mindmap-context-menu.up:before {
+        content: "";
+        height: 0;
+        width: 0;
+        border: solid 6px transparent;
+        border-top: solid 6px rgba(0, 0, 0, 0.8);
+        position: absolute;
+        top: auto;
+        left: 20px;
+        bottom: -12px; }
