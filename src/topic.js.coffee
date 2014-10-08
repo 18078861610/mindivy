@@ -519,12 +519,14 @@ class Topic extends Module
     else
       @$el.addClass 'leaf'
 
+
     # 显示图片
     if @img_url
       @$el.addClass 'with-image'
       @$image.css 'background-image', "url(#{@img_url})"
     else
       @$el.removeClass 'with-image'
+
 
     # 根据节点是左侧节点还是右侧节点，给予相应的 className
     @$el.removeClass('left-side').removeClass('right-side')

@@ -134,10 +134,13 @@ class Mindmap extends Module
 
   constructor: (@$el)->
     @$topics_area = @$el.find('.topics-area')
+    @$bottom_area = @$el.find('.bottom-area')
+
     @basic_layout = new BasicLayout @
     @content_menu = new ContextMenu @
 
     @bind_topics_events()
+    @bind_drag_events()
 
   init: ->
     @root_topic = Topic.generate_root @
@@ -259,6 +262,32 @@ class Mindmap extends Module
           # console.log '打开添加图片对话框'
           evt.preventDefault()
           @active_topic.open_image_dialog()
+
+
+  # 设置拖拽移动事件
+  bind_drag_events: ->
+    @$bottom_area.drag 'start', (evt, dd)=>
+      mindmap_offsetX = parseInt @$topics_area.css 'margin-left'
+      mindmap_offsetY = parseInt @$topics_area.css 'margin-top'
+
+      @dom_beginX = mindmap_offsetX
+      @dom_beginY = mindmap_offsetY
+
+      console.log @dom_beginX, @dom_beginY
+
+    , { distance: 10 }
+
+    @$bottom_area.drag (evt, dd)=>
+      mouseX = @mouse_beginX + dd.deltaX
+      mouseY = @mouse_beginY + dd.deltaY
+
+      domX = @dom_beginX + dd.deltaX
+      domY = @dom_beginY + dd.deltaY
+
+      @$topics_area
+        .css
+          'margin-left': domX
+          'margin-top': domY
 
 
 # 用调试代码初始化思维导图
