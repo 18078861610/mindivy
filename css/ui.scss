@@ -346,6 +346,7 @@ body.editor {
     canvas {
       position:absolute;
       pointer-events:none;
+      @include transition(all .3s);
     }
 
     .drag-placeholder {

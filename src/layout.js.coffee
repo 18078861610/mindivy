@@ -253,6 +253,8 @@ class BasicLayout extends Module
 
     if not topic.$canvas
       topic.$canvas = jQuery '<canvas>'
+        .attr 'id', Utils.generate_id()
+        .appendTo @mindmap.$topics_area 
 
     topic.$canvas
       .css
@@ -263,7 +265,6 @@ class BasicLayout extends Module
       .attr
         'width': width
         'height': height
-      .appendTo @mindmap.$topics_area    
 
     ctx = topic.$canvas[0].getContext '2d'
     ctx.clearRect 0, 0, width, height
