@@ -812,6 +812,9 @@ class Topic extends Module
   handle_space_keydown: ->
     @fsm.start_edit() if @fsm.can 'start_edit'
 
+  handle_context_menu_edit: ->
+    @fsm.select() if @fsm.can 'select'
+    @fsm.start_edit() if @fsm.can 'start_edit'
 
   # 处理 insert 按键按下事件
   handle_insert_keydown: ->
@@ -819,7 +822,14 @@ class Topic extends Module
 
     @insert_topic {flash: true}
     @mindmap.layout()
-    @children[@children.length - 1].fsm.select()
+    @last_child().fsm.select()
+
+  # 处理右键菜单的 “新增节点” 按下
+  handle_context_menu_insert: ->
+    @insert_topic {flash: true}
+    @mindmap.layout()
+    @last_child().fsm.select()
+
 
   # 处理回车键按下事件
   handle_enter_keydown: ->
@@ -841,10 +851,15 @@ class Topic extends Module
   # 处理 delete 键按下事件
   handle_delete_keydown: ->
     return if not @fsm.is 'active'
-
     if not @is_root()
       @delete_topic()
       @mindmap.layout()
+
+  handle_context_menu_delete: ->
+    if not @is_root()
+      @delete_topic()
+      @mindmap.layout()
+
 
   handle_arrow_keydown: (direction)->
     return @_handle_arrow_keydown_root(direction) if @is_root()

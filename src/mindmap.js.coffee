@@ -7,14 +7,14 @@ JSONInstanceMethods =
   data: (topic)->
     if topic.is_root()
       return {
-        text: escape(topic.text)
+        text: topic.text
         img_url: topic.img_url
         children: topic.children.map (child)=> @data child
         is_root: true
       }
 
     return {
-      text: escape(topic.text)
+      text: topic.text
       img_url: topic.img_url
       children: topic.children.map (child)=> @data child
       side: topic.side
@@ -51,6 +51,82 @@ JSONClassMethods =
       @_r child_topic, child_data
 
 
+class ContextMenu
+  constructor: (@mindmap)->
+    @init_dom()
+    @bind_events()
+
+  # 初始化右键菜单的 dom
+  init_dom: ->
+    @$el = jQuery '<div>'
+      .addClass 'mindmap-context-menu'
+      .hide()
+      .appendTo @mindmap.$topics_area
+
+    # 新增子节点
+    @$op_insert = jQuery '<div>'
+      .addClass 'op'
+      .appendTo @$el
+      .append jQuery('<i>').addClass('fa').addClass('fa-plus')
+      .append jQuery('<span>').html('新增节点')
+
+    # 删除节点
+    @$op_delete = jQuery '<div>'
+      .addClass 'op'
+      .appendTo @$el
+      .append jQuery('<i>').addClass('fa').addClass('fa-trash')
+      .append jQuery('<span>').html('删除')
+
+    # 编辑节点文字
+    @$op_edit = jQuery '<div>'
+      .addClass 'op'
+      .appendTo @$el
+      .append jQuery('<i>').addClass('fa').addClass('fa-pencil')
+      .append jQuery('<span>').html('编辑')
+
+    # 节点图片
+    @$op_image = jQuery '<div>'
+      .addClass 'op'
+      .appendTo @$el
+      .append jQuery('<i>').addClass('fa').addClass('fa-image')
+      .append jQuery('<span>').html('附加图片')
+
+
+  bind_events: ->
+    @$op_insert.on 'click', =>
+      @hide()
+      @topic?.handle_context_menu_insert()
+
+    @$op_delete.on 'click', =>
+      @hide()
+      @topic?.handle_context_menu_delete()
+
+    @$op_edit.on 'click', =>
+      @hide()
+      @topic?.handle_context_menu_edit()
+
+    @$op_image.on 'click', =>
+      @hide()
+      @topic?.open_image_dialog()
+
+
+  show_on: (topic)->
+    left = topic.layout_left
+    top  = topic.layout_top + topic.layout_height
+
+    @$el
+      .css
+        'left': left
+        'top': top
+      .show()
+
+    @topic = topic
+    @topic?.fsm?.select()
+
+  hide: ->
+    @$el.hide()
+
+
 
 class Mindmap extends Module
   @include JSONInstanceMethods
@@ -59,6 +135,7 @@ class Mindmap extends Module
   constructor: (@$el)->
     @$topics_area = @$el.find('.topics-area')
     @basic_layout = new BasicLayout @
+    @content_menu = new ContextMenu @
 
     @bind_topics_events()
 
@@ -114,18 +191,31 @@ class Mindmap extends Module
 
     # 单击节点
     @$el.delegate '.topic', 'click', (evt)->
+      that.content_menu.hide()
       evt.stopPropagation()
       topic = Topic.get jQuery(this).data('id')
       topic.handle_click()
 
+
     @$el.delegate '.topic .joint', 'click', (evt)->
+      that.content_menu.hide()
       evt.stopPropagation()
       topic = Topic.get jQuery(this).closest('.topic').data('id')
       topic.handle_joint_click()
-      
+
+
+    # 右键单击节点
+    @$el.delegate '.topic', 'contextmenu', (evt)->
+      evt.preventDefault()
+      console.log '右键菜单'
+      topic = Topic.get jQuery(this).data('id')
+      that.content_menu.show_on topic
+            
+
       
     # 点击节点外区域
     @$el.delegate '.bottom-area', 'click', (evt)=>
+      @content_menu.hide()
       @active_topic.handle_click_out() if @active_topic
 
 
