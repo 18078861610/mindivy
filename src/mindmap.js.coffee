@@ -149,6 +149,9 @@ class Mindmap extends Module
   @extend JSONClassMethods
 
   constructor: (@$el)->
+    @ZOOM_SCALES = [10, 25, 33, 50, 67, 75, 90, 100, 110, 125, 150, 175, 200, 250, 300]
+    @scale = 100
+
     @$topics_area = @$el.find('.topics-area')
     @$bottom_area = @$el.find('.bottom-area')
 
@@ -180,8 +183,17 @@ class Mindmap extends Module
 
 
   # 使得指定的节点在编辑器界面内居中显示
-  center_to: (topic, is_animate)->
+  center_to_root: ->
+    @$topics_area
+      .addClass 'with-animate'
+      .css
+        'margin-left': 0
+        'margin-top': 0
 
+    setTimeout =>
+      @$topics_area
+        .removeClass 'with-animate'
+    , 300
 
   # 整体移动
   # 参数： x 和 y 方向移动的距离
@@ -197,6 +209,39 @@ class Mindmap extends Module
         .removeClass 'with-animate'
     , 300
 
+  # scale 缩小
+  zoom_out: ->
+    level = @ZOOM_SCALES.indexOf @scale
+    return if level is 0
+
+    @scale = @ZOOM_SCALES[level - 1]
+
+    @$topics_area
+      .addClass 'with-animate'
+      .css
+        'transform': "scale(#{@scale / 100.0})"
+
+    setTimeout =>
+      @$topics_area
+        .removeClass 'with-animate'
+    , 300
+
+  # scale 放大
+  zoom_in: ->
+    level = @ZOOM_SCALES.indexOf @scale
+    return if level is @ZOOM_SCALES.length - 1
+
+    @scale = @ZOOM_SCALES[level + 1]
+
+    @$topics_area
+      .addClass 'with-animate'
+      .css
+        'transform': "scale(#{@scale / 100.0})"
+
+    setTimeout =>
+      @$topics_area
+        .removeClass 'with-animate'
+    , 300
 
   # 在选择的节点上新增子节点
   insert_topic: ->
@@ -415,16 +460,19 @@ bind_events = (mindmap)->
 
   # 设置工具按钮操作事件
   # 导图居中显示
-  mindmap.$el.delegate '.ops a.op.center', 'click', =>
-    mindmap.center_to mindmap.root_topic, true
+  jQuery(document).delegate '.mindmap-ops a.op.center', 'click', =>
+    mindmap.center_to_root()
 
-
-  mindmap.$el.delegate '.ops a.op.insert-topic', 'click', =>
-    mindmap.insert_topic()
-
-
-  jQuery('.to-json').on 'click', =>
+  jQuery(document).delegate '.mindmap-ops a.op.to-json', 'click', =>
     console.log mindmap.to_json()
+
+  jQuery(document).delegate '.mindmap-ops a.op.zoom-out', 'click', =>
+    mindmap.zoom_out()
+    jQuery('.mindmap-ops .scale span.value').html mindmap.scale
+
+  jQuery(document).delegate '.mindmap-ops a.op.zoom-in', 'click', =>
+    mindmap.zoom_in()
+    jQuery('.mindmap-ops .scale span.value').html mindmap.scale
 
 
 jQuery(document).ready ->
