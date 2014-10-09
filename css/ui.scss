@@ -125,66 +125,20 @@ body.editor {
       background-color:$topic-bg-common;
       border:solid $border-width rgba(black, 0.25);
       @include transition(all .3s);
+      .text {@include topic-text;}
 
       &.root {
         background-color: lighten(#44B2F5, 25%)
       }
+
+      &:hover  { border-color: $topic-hover-border;}
+      &.active { border-color: $topic-active-border; background:lighten(#4CC85E, 15%);}
 
       &.ondrag {
         opacity: 0.4;
         @include transition(none);
         background-color: #FFE08B;
       }
-
-      // 为了便于调试，临时增加的样式，用来区分左右两侧节点
-      // &.left-side {
-      //   background-color: lighten(#F18D05, 20%);
-      // }
-
-      &.will-drop-on {
-        background-color: lighten(red, 30%);
-        
-        &:before {
-          content:"";
-          position: absolute;
-          height:2px;top:50%;margin-top:-1px;width:20px;
-          background-color: lighten(red, 30%);
-        }
-
-        &.right-side:before {
-          left:100%;
-        }
-
-        &.left-side:before {
-          right:100%;
-        }
-
-        &:after {
-          content:"";
-          position:absolute;
-          background-color: lighten(red, 30%);
-          top:0;bottom:0;
-          border-radius:4px;
-          width:80px;
-        }
-
-        &.right-side:after {
-          left:calc(100% + 20px);
-        }
-
-        &.left-side:after {
-          right:calc(100% + 20px);
-        }
-
-      }
-
-
-      &:hover  { border-color: $topic-hover-border;}
-      &.active { border-color: $topic-active-border; background:lighten(#4CC85E, 15%);}
-      
-
-      .text {@include topic-text;}
-
 
       &.editing {
         z-index: 5;
@@ -322,6 +276,80 @@ body.editor {
         }
       }
 
+
+      // 拖拽相关的样式
+      &.will-drop-on {
+        background-color: lighten(red, 30%);
+        
+        &:before {
+          content:"";
+          position: absolute;
+          height:2px;top:50%;margin-top:-1px;width:20px;
+          background-color: lighten(red, 30%);
+        }
+
+        &.right-side:before {
+          left:100%;
+        }
+
+        &.left-side:before {
+          right:100%;
+        }
+
+        &:after {
+          content:"";
+          position:absolute;
+          background-color: lighten(red, 30%);
+          top:0;bottom:0;
+          border-radius:4px;
+          width:80px;
+        }
+
+        &.right-side:after {
+          left:calc(100% + 20px);
+        }
+
+        &.left-side:after {
+          right:calc(100% + 20px);
+        }
+      }
+
+      &.will-drop-prev {
+        // background-color: lighten(red, 30%);
+        z-index:2;
+        &:before {
+          content:"";
+          position:absolute;
+          height:20px;width:80px;
+          background-color: lighten(red, 30%);
+          top:-20px - 2px;left:-2px;
+          border-radius:4px;
+          z-index:4;
+        }
+        &.left-side:before {
+          left:auto;
+          right:0;
+        }
+      }
+
+      &.will-drop-next {
+        // background-color: lighten(red, 30%);
+        z-index:2;
+        &:before {
+          content:"";
+          position:absolute;
+          height:20px;width:80px;
+          background-color: lighten(red, 30%);
+          bottom:-20px - 2px;left:-2px;
+          border-radius:4px;
+          z-index:4;
+        }
+        &.left-side:before {
+          left:auto;
+          right:0;
+        }
+      }
+
     }
 
     .topic .float-num {
@@ -351,7 +379,7 @@ body.editor {
 
     .drag-placeholder {
       pointer-events:none;
-      background-color:rgba(black, 0.5);
+      background-color:rgba(black, 0.3);
       border-radius:4px;
       position: absolute;
       z-index:5;

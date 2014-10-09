@@ -304,6 +304,8 @@ class Mindmap extends Module
       @dom_beginX = mindmap_offsetX
       @dom_beginY = mindmap_offsetY
 
+      @content_menu.hide()
+
       # console.log @dom_beginX, @dom_beginY
 
     , { distance: 10 }

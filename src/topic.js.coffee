@@ -420,8 +420,6 @@ class Topic extends Module
       @mindmap.move(xmove, ymove)
 
 
-
-
     @fsm.onbeforeunselect = =>
       @mindmap.active_topic = null
       @$el.removeClass('active')
@@ -666,14 +664,29 @@ class Topic extends Module
           'top': domY
 
       Topic.each (id, topic)=>
-        return if topic.is_root()
-        return if @ is topic
-        return if @is_ancestor_of(topic)
+        return if @ is topic # 不能放置在当前节点自己身上
+        return if @is_ancestor_of(topic) # 不能放置在子节点上
 
-        if topic.drag_trigger_area_child.is_contain mouseX, mouseY
-          @_show_will_drop_on(topic)
-        else
-          @_hide_will_drop_on(topic)
+        # 三种情况
+        # 1. 拖拽到根节点上
+        # 2. 拖拽到子节点之后
+        # 3. 拖拽到一组节点之间
+
+        if topic.is_root()
+          # 放置于根节点的拖拽提示
+          return
+
+        topic.$el
+          .removeClass 'will-drop-prev'
+          .removeClass 'will-drop-next'
+          .removeClass 'will-drop-on'
+        
+        if topic.prev_sibling_drag_area?.is_contain mouseX, mouseY
+          topic.$el.addClass 'will-drop-prev'
+        if topic.next_sibling_drag_area?.is_contain mouseX, mouseY
+          topic.$el.addClass 'will-drop-next'
+        if topic.leaf_topic_drag_area?.is_contain mouseX, mouseY
+          topic.$el.addClass 'will-drop-on'
 
 
     @$el.drag 'end', (evt, dd)=>
@@ -683,41 +696,62 @@ class Topic extends Module
       @$el.removeClass 'ondrag'
       @$drag_placeholder.remove()
 
-      # TODO 重构
       Topic.each (id, topic)=>
-        return if topic.is_root()
-        return if @ is topic
-        return if @is_ancestor_of(topic)
+        topic.$el
+          .removeClass 'will-drop-prev'
+          .removeClass 'will-drop-next'
+          .removeClass 'will-drop-on'
 
-        if topic.drag_trigger_area_child.is_contain mouseX, mouseY
+        return if @ is topic # 不能放置在当前节点自己身上
+        return if @is_ancestor_of(topic) # 不能放置在子节点上
+
+        if topic.prev_sibling_drag_area?.is_contain mouseX, mouseY
+          @move_to_prev_of topic
+        if topic.next_sibling_drag_area?.is_contain mouseX, mouseY
+          @move_to_next_of topic
+        if topic.leaf_topic_drag_area?.is_contain mouseX, mouseY
           @move_to_child_of topic
 
-
-  # 拖拽中显示将要放置子节点的提示信息
-  _show_will_drop_on: (topic)->
-    topic.$el.addClass 'will-drop-on'
-
-  _hide_will_drop_on: (topic)->
-    topic.$el.removeClass 'will-drop-on'
-
+  # 计算节点的拖拽触发区域
   _calc_drag_trigger_area_r: (topic)->
-    # 子节点拖拽触发区域
-    if not topic.is_root()
-      
+    if topic.is_root()
+      # return
+    else
+      # 如果有n个子节点，那么计算2n个区域
+      # 图示参考：http://img.teamkn.com/image_service/images/UvtosYTy/UvtosYTy.png
+      half_padding = 10 # 垂直间距的一半
+      x_padding = 50 # 水平间距
+
       if topic.side is 'right'
-        left = topic.layout_left + topic.layout_width / 2.0
-        right =  topic.layout_left + topic.layout_width + 60
-      
+        left  = topic.layout_left - x_padding
+        right = topic.layout_x_center
+
       if topic.side is 'left'
-        left =  topic.layout_left - 60
-        right = topic.layout_left + topic.layout_width / 2.0
+        left  = topic.layout_x_center
+        right = topic.layout_right + x_padding
 
-      top = topic.layout_top
-      bottom = topic.layout_top + topic.layout_height
+      top0 = topic.layout_top - half_padding
+      top1 = topic.layout_y_center
+      top2 = topic.layout_bottom + half_padding
 
-      topic.drag_trigger_area_child = new Area(left, right, top, bottom)
+      topic.prev_sibling_drag_area = new Area(left, right, top0, top1)
+      topic.next_sibling_drag_area = new Area(left, right, top1, top2)
 
+      if not topic.has_children()
+        # 叶子节点，计算子节点拖拽触发区域
+        if topic.side is 'left'
+          left  = topic.layout_left - 60
+          right = topic.layout_x_center
 
+        if topic.side is 'right'
+          left  = topic.layout_x_center
+          right = topic.layout_right + 60
+
+        top    = topic.layout_top
+        bottom = topic.layout_bottom
+        topic.leaf_topic_drag_area = new Area(left, right, top, bottom)
+
+    
     for child in topic.children
       @_calc_drag_trigger_area_r child
 
@@ -725,26 +759,69 @@ class Topic extends Module
   move_to_child_of: (topic)->
     console.log "#{@id} 拖拽到 #{topic.id}"
 
-    @_hide_will_drop_on(topic)
-
-    @side = topic.side
-
     # 从父节点的 children 中移除当前节点
+    @__remove_from_parent()
+    
+    # 修改父节点引用
+    @parent = topic
+    @depth = @parent.depth + 1
+    topic.children.push @
 
-    # 清除父子关系 # TODO 重构，重复逻辑提取方法
+    @mindmap.layout()
+
+  move_to_prev_of: (topic)->
+    # 从父节点的 children 中移除当前节点
+    @__remove_from_parent()
+
+    # 修改父节点引用
+    @side = topic.side
+    @parent = topic.parent
+    @depth = @parent.depth + 1
+
+    parent_children = @parent.children
+    idx = parent_children.indexOf topic
+
+    arr0 = parent_children[0 ... idx]
+    arr1 = parent_children[idx .. -1]
+
+    arr0.push @
+    parent_children = arr0.concat arr1
+
+    @parent.children = parent_children
+
+    @mindmap.layout()
+
+  move_to_next_of: (topic)->
+    # 从父节点的 children 中移除当前节点
+    @__remove_from_parent()
+
+    # 修改父节点引用
+    @side = topic.side
+    @parent = topic.parent
+    @depth = @parent.depth + 1
+
+    parent_children = @parent.children
+    idx = parent_children.indexOf topic
+
+    arr0 = parent_children[0 .. idx]
+    arr1 = parent_children[idx + 1 .. -1]
+
+    arr0.push @
+    parent_children = arr0.concat arr1
+
+    @parent.children = parent_children
+
+    @mindmap.layout()
+
+
+  # 从父节点的 children 中移除当前节点，并处理数据结构变化
+  __remove_from_parent: ->
     parent_children = @parent.children
     idx = parent_children.indexOf @
     arr0 = parent_children[0 ... idx]
     arr1 = parent_children[idx + 1 .. -1]
     parent_children = arr0.concat arr1
     @parent.children = parent_children
-
-
-    # 修改父节点引用
-    @parent = topic
-    topic.children.push @
-
-    @mindmap.layout()
 
 
   # 计算节点的尺寸，便于其他计算使用

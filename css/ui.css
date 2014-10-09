@@ -1749,47 +1749,6 @@ body.editor {
       -ms-transition: all 0.3s;
       -o-transition: all 0.3s;
       transition: all 0.3s; }
-      .mindmap .topics-area .topic.root {
-        background-color: #bde4fb; }
-      .mindmap .topics-area .topic.ondrag {
-        opacity: 0.4;
-        -webkit-transition: none;
-        -moz-transition: none;
-        -ms-transition: none;
-        -o-transition: none;
-        transition: none;
-        background-color: #FFE08B; }
-      .mindmap .topics-area .topic.will-drop-on {
-        background-color: #ff9999; }
-        .mindmap .topics-area .topic.will-drop-on:before {
-          content: "";
-          position: absolute;
-          height: 2px;
-          top: 50%;
-          margin-top: -1px;
-          width: 20px;
-          background-color: #ff9999; }
-        .mindmap .topics-area .topic.will-drop-on.right-side:before {
-          left: 100%; }
-        .mindmap .topics-area .topic.will-drop-on.left-side:before {
-          right: 100%; }
-        .mindmap .topics-area .topic.will-drop-on:after {
-          content: "";
-          position: absolute;
-          background-color: #ff9999;
-          top: 0;
-          bottom: 0;
-          border-radius: 4px;
-          width: 80px; }
-        .mindmap .topics-area .topic.will-drop-on.right-side:after {
-          left: calc(100% + 20px); }
-        .mindmap .topics-area .topic.will-drop-on.left-side:after {
-          right: calc(100% + 20px); }
-      .mindmap .topics-area .topic:hover {
-        border-color: rgba(0, 0, 0, 0.4); }
-      .mindmap .topics-area .topic.active {
-        border-color: rgba(0, 0, 0, 0.5);
-        background: #87da93; }
       .mindmap .topics-area .topic .text {
         min-height: 24px;
         line-height: 24px;
@@ -1798,6 +1757,21 @@ body.editor {
         padding: 3px 8px;
         font-weight: bold;
         color: rgba(0, 0, 0, 0.6); }
+      .mindmap .topics-area .topic.root {
+        background-color: #bde4fb; }
+      .mindmap .topics-area .topic:hover {
+        border-color: rgba(0, 0, 0, 0.4); }
+      .mindmap .topics-area .topic.active {
+        border-color: rgba(0, 0, 0, 0.5);
+        background: #87da93; }
+      .mindmap .topics-area .topic.ondrag {
+        opacity: 0.4;
+        -webkit-transition: none;
+        -moz-transition: none;
+        -ms-transition: none;
+        -o-transition: none;
+        transition: none;
+        background-color: #FFE08B; }
       .mindmap .topics-area .topic.editing {
         z-index: 5; }
         .mindmap .topics-area .topic.editing .text {
@@ -1909,6 +1883,62 @@ body.editor {
         vertical-align: middle; }
       .mindmap .topics-area .topic.with-image .text-ipter-box {
         margin-left: 58px; }
+      .mindmap .topics-area .topic.will-drop-on {
+        background-color: #ff9999; }
+        .mindmap .topics-area .topic.will-drop-on:before {
+          content: "";
+          position: absolute;
+          height: 2px;
+          top: 50%;
+          margin-top: -1px;
+          width: 20px;
+          background-color: #ff9999; }
+        .mindmap .topics-area .topic.will-drop-on.right-side:before {
+          left: 100%; }
+        .mindmap .topics-area .topic.will-drop-on.left-side:before {
+          right: 100%; }
+        .mindmap .topics-area .topic.will-drop-on:after {
+          content: "";
+          position: absolute;
+          background-color: #ff9999;
+          top: 0;
+          bottom: 0;
+          border-radius: 4px;
+          width: 80px; }
+        .mindmap .topics-area .topic.will-drop-on.right-side:after {
+          left: calc(100% + 20px); }
+        .mindmap .topics-area .topic.will-drop-on.left-side:after {
+          right: calc(100% + 20px); }
+      .mindmap .topics-area .topic.will-drop-prev {
+        z-index: 2; }
+        .mindmap .topics-area .topic.will-drop-prev:before {
+          content: "";
+          position: absolute;
+          height: 20px;
+          width: 80px;
+          background-color: #ff9999;
+          top: -22px;
+          left: -2px;
+          border-radius: 4px;
+          z-index: 4; }
+        .mindmap .topics-area .topic.will-drop-prev.left-side:before {
+          left: auto;
+          right: 0; }
+      .mindmap .topics-area .topic.will-drop-next {
+        z-index: 2; }
+        .mindmap .topics-area .topic.will-drop-next:before {
+          content: "";
+          position: absolute;
+          height: 20px;
+          width: 80px;
+          background-color: #ff9999;
+          bottom: -22px;
+          left: -2px;
+          border-radius: 4px;
+          z-index: 4; }
+        .mindmap .topics-area .topic.will-drop-next.left-side:before {
+          left: auto;
+          right: 0; }
     .mindmap .topics-area .topic .float-num {
       position: absolute;
       z-index: 2;
@@ -1934,7 +1964,7 @@ body.editor {
       transition: all 0.3s; }
     .mindmap .topics-area .drag-placeholder {
       pointer-events: none;
-      background-color: rgba(0, 0, 0, 0.5);
+      background-color: rgba(0, 0, 0, 0.3);
       border-radius: 4px;
       position: absolute;
       z-index: 5; }

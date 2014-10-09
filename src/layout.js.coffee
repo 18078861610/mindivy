@@ -118,7 +118,7 @@ class BasicLayout extends Module
   @include BasicLayoutDrawLineMethods
 
   constructor: (@mindmap)->
-    @TOPIC_Y_PADDING = 10
+    @TOPIC_Y_PADDING = 20
     @TOPIC_X_PADDING = 50
     @JOINT_WIDTH = 16 # 折叠点的宽度
 
@@ -204,6 +204,7 @@ class BasicLayout extends Module
     # console.log '开始画线'
     root_topic = @mindmap.root_topic
     @_d_r root_topic
+
 
   _d_r: (topic)->
     if topic.has_children()
