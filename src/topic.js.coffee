@@ -390,6 +390,7 @@ class Topic extends Module
       if @mindmap.active_topic and @mindmap.active_topic != @
         @mindmap.active_topic.handle_click_out()
 
+
       @mindmap.active_topic = @
       @$el.addClass('active')
       
@@ -680,7 +681,7 @@ class Topic extends Module
           .removeClass 'will-drop-prev'
           .removeClass 'will-drop-next'
           .removeClass 'will-drop-on'
-        
+
         if topic.prev_sibling_drag_area?.is_contain mouseX, mouseY
           topic.$el.addClass 'will-drop-prev'
         if topic.next_sibling_drag_area?.is_contain mouseX, mouseY
@@ -714,6 +715,10 @@ class Topic extends Module
 
   # 计算节点的拖拽触发区域
   _calc_drag_trigger_area_r: (topic)->
+    topic.prev_sibling_drag_area = null
+    topic.next_sibling_drag_area = null
+    topic.leaf_topic_drag_area = null
+
     if topic.is_root()
       # return
     else

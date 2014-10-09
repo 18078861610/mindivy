@@ -89,16 +89,17 @@ body.editor {
   }
 
   .keys {
-    display: none;
     float:left;
     height: 30px;line-height: 30px;
-    span {
-      float:left;
-      height: 30px;line-height: 30px;
-      background-color: #f1f1f1;
-      margin-right: 10px;
+    margin:10px 0 10px 20px;
+    span.key {
+      background:rgba(black, 0.6);
+      padding:1px 5px;
       border-radius:3px;
-      padding:0 10px;
+      color:white;
+    }
+    span.desc {
+      margin-right: 10px;
     }
   }
 }

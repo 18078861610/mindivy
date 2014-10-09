@@ -217,7 +217,8 @@ class BasicLayout extends Module
 
     else
       # 如果没有子节点，把 canvas 图层移除掉
-      topic.$canvas.remove() if topic.$canvas
+      topic.$canvas?.remove()
+      topic.$canvas = null
 
 
   _init_canvas_on: (topic)->

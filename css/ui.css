@@ -1706,18 +1706,17 @@ body.editor {
     margin: 10px 0 10px 10px;
     font-size: 18px; }
   .mindmap-ops .keys {
-    display: none;
     float: left;
     height: 30px;
-    line-height: 30px; }
-    .mindmap-ops .keys span {
-      float: left;
-      height: 30px;
-      line-height: 30px;
-      background-color: #f1f1f1;
-      margin-right: 10px;
+    line-height: 30px;
+    margin: 10px 0 10px 20px; }
+    .mindmap-ops .keys span.key {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 1px 5px;
       border-radius: 3px;
-      padding: 0 10px; }
+      color: white; }
+    .mindmap-ops .keys span.desc {
+      margin-right: 10px; }
 
 .mindmap {
   position: fixed;
