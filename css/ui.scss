@@ -14,6 +14,8 @@ $topic-text-padding-y: 3px;
 
 $topic-border-radius:4px;
 
+$topic-box-shadow:1px 1px 3px rgba(black, 0.4);
+
 @import "mixin";
 
 $fa-font-path: "font-awesome-4.2.0/fonts";
@@ -140,7 +142,10 @@ body.editor {
       cursor: pointer;
       font-size: 0;
       background-color:$topic-bg-common;
-      border:solid $border-width rgba(black, 0.25);
+      // border:solid $border-width rgba(black, 0.25);
+      border:solid $border-width transparent;
+      box-shadow: $topic-box-shadow;
+
       @include transition(all .3s);
       .text {@include topic-text;}
 
@@ -272,7 +277,7 @@ body.editor {
           border:solid 3px #fff;
           margin-top:-$topic-image-offset;
           margin-left:-$topic-image-offset;
-          box-shadow:1px 1px 3px rgba(black, 0.4);
+          box-shadow:$topic-box-shadow;
 
 
           @include transition(all .3s);

@@ -1758,7 +1758,8 @@ body.editor {
       cursor: pointer;
       font-size: 0;
       background-color: white;
-      border: solid 2px rgba(0, 0, 0, 0.25);
+      border: solid 2px transparent;
+      box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
       -webkit-transition: all 0.3s;
       -moz-transition: all 0.3s;
       -ms-transition: all 0.3s;
