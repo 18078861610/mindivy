@@ -400,11 +400,10 @@ class Topic extends Module
       dl = @distance_of_left()
       dr = @distance_of_right()
 
-
-      console.log "距离上：#{dt}"
-      console.log "距离下：#{db}"
-      console.log "距离左：#{dl}"
-      console.log "距离右：#{dr}"
+      # console.log "距离上：#{dt}"
+      # console.log "距离下：#{db}"
+      # console.log "距离左：#{dl}"
+      # console.log "距离右：#{dr}"
 
       if dr < 0
         xmove = dr - 10
@@ -841,6 +840,7 @@ class Topic extends Module
   # options
   #   flash: 新增节点时是否有闪烁效果
   #   after: 新增的节点在哪个同级节点的后面，如果不传的话默认最后一个
+  #   child_topic: 传入一个 child_topic ，否则会重新构造一个
 
   # 如果当前节点是根节点：
   #   当左边的一级子节点较多（或相等），新增的一级子节点排在右边
@@ -856,7 +856,7 @@ class Topic extends Module
     else
       text = Topic.LV2_TOPIC_TEXT
 
-    child_topic = new Topic text, @mindmap
+    child_topic = options.child_topic || new Topic text, @mindmap
     child_topic.depth = @depth + 1
     child_topic.flash = flash
 
@@ -895,7 +895,7 @@ class Topic extends Module
     else if @prev()
       @prev().fsm.select()
     else
-      @parent.fsm.select()
+      @parent.fsm.select() if @parent.fsm.is 'common'
 
 
     # 删除 dom
@@ -973,10 +973,11 @@ class Topic extends Module
   # 处理 insert 按键按下事件
   handle_insert_keydown: ->
     return if not @fsm.is 'active'
+    new Operation.Add(@, 0).excute()
 
-    @insert_topic {flash: true}
-    @mindmap.layout()
-    @last_child().fsm.select()
+    # @insert_topic {flash: true}
+    # @mindmap.layout()
+    # @last_child().fsm.select()
 
   # 处理右键菜单的 “新增节点” 按下
   handle_context_menu_insert: ->

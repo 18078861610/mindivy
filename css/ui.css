@@ -1698,6 +1698,10 @@ body.editor {
       background-color: #59637a; }
     .mindmap-ops a.op i {
       margin-right: 5px; }
+    .mindmap-ops a.op.disabled {
+      background-color: #ddd !important;
+      color: #999 !important;
+      cursor: default; }
   .mindmap-ops .scale {
     float: left;
     height: 30px;

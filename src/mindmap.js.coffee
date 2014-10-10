@@ -474,6 +474,35 @@ bind_events = (mindmap)->
     mindmap.zoom_in()
     jQuery('.mindmap-ops .scale span.value').html mindmap.scale
 
+  jQuery(document).delegate '.mindmap-ops a.op.undo:not(.disabled)', 'click', =>
+    Operation.undo()
+
+  jQuery(document).delegate '.mindmap-ops a.op.redo:not(.disabled)', 'click', =>
+    Operation.redo()
+
+  jQuery(document).on 'mindmap:opertion-list-pushed', =>
+    jQuery('.mindmap-ops a.op.redo').addClass('disabled')
+    
+    if Operation.max_undo_count > 0
+      jQuery('.mindmap-ops a.op.undo').removeClass('disabled')
+
+  jQuery(document).on 'mindmap:opertion-undo', =>
+    jQuery('.mindmap-ops a.op.redo').removeClass('disabled')
+
+    if Operation.max_undo_count > 0
+      jQuery('.mindmap-ops a.op.undo').removeClass('disabled')
+
+    if Operation.max_undo_count is 0
+      jQuery('.mindmap-ops a.op.undo').addClass('disabled')
+
+  jQuery(document).on 'mindmap:opertion-redo', =>
+    jQuery('.mindmap-ops a.op.undo').removeClass('disabled')
+
+    if Operation.max_undo_count < Operation.OPERATION_LIST.length
+      jQuery('.mindmap-ops a.op.redo').removeClass('disabled')
+    else
+      jQuery('.mindmap-ops a.op.redo').addClass('disabled')
+
 
 jQuery(document).ready ->
   # mindmap = prepare_mindmap mindmap

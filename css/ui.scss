@@ -80,6 +80,12 @@ body.editor {
       background-color:lighten(#2E333F, 20%);
     }
     i {margin-right: 5px;}
+
+    &.disabled {
+      background-color:#ddd !important;
+      color:#999 !important;
+      cursor:default;
+    }
   }
 
   .scale {
