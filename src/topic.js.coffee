@@ -400,11 +400,10 @@ class Topic extends Module
       dl = @distance_of_left()
       dr = @distance_of_right()
 
-
-      console.log "距离上：#{dt}"
-      console.log "距离下：#{db}"
-      console.log "距离左：#{dl}"
-      console.log "距离右：#{dr}"
+      # console.log "距离上：#{dt}"
+      # console.log "距离下：#{db}"
+      # console.log "距离左：#{dl}"
+      # console.log "距离右：#{dr}"
 
       if dr < 0
         xmove = dr - 10
@@ -762,7 +761,7 @@ class Topic extends Module
 
 
   move_to_child_of: (topic)->
-    console.log "#{@id} 拖拽到 #{topic.id}"
+    # console.log "#{@id} 拖拽到 #{topic.id}"
 
     # 从父节点的 children 中移除当前节点
     @__remove_from_parent()
@@ -861,23 +860,24 @@ class Topic extends Module
     child_topic.flash = flash
 
     if @is_root()
-      c_left  = @left_children().length
-      c_right = @right_children().length
-
-      # console.log "left: #{c_left}, right: #{c_right}"
-
-      if c_left >= c_right
-        child_topic.side = 'right'
+      if after?
+        child_topic.side = @children[after].side
       else
-        child_topic.side = 'left'
+        c_left  = @left_children().length
+        c_right = @right_children().length
+        # console.log "left: #{c_left}, right: #{c_right}"
+        if c_left >= c_right
+          child_topic.side = 'right'
+        else
+          child_topic.side = 'left'
 
-    if after is undefined
+    if not after?
       @children.push child_topic
     else
       arr0 = @children[0..after]
       arr1 = @children[after + 1..@children.length]
       @children = (arr0.concat [child_topic]).concat arr1
-      console.log @children
+      # console.log @children
 
     child_topic.parent = @
 
@@ -890,7 +890,7 @@ class Topic extends Module
     # 如果有后续同级节点，选中后续同级节点
     # 如果有前置同级节点，选中前置同级节点
     if @next()
-      console.log @next()
+      # console.log @next()
       @next().fsm.select()
     else if @prev()
       @prev().fsm.select()
@@ -999,7 +999,10 @@ class Topic extends Module
       after: @parent.children.indexOf @
     }
     @mindmap.layout()
-    @next().fsm.select()
+
+    idx = @parent.children.indexOf @
+    next = @parent.children[idx + 1]
+    next.fsm.select()
 
 
   # 处理 delete 键按下事件

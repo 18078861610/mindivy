@@ -143,7 +143,6 @@ class ContextMenu
     @$el.hide()
 
 
-
 class Mindmap extends Module
   @include JSONInstanceMethods
   @extend JSONClassMethods
@@ -286,7 +285,7 @@ class Mindmap extends Module
     # 右键单击节点
     @$el.delegate '.topic', 'contextmenu', (evt)->
       evt.preventDefault()
-      console.log '右键菜单'
+      # console.log '右键菜单'
       topic = Topic.get jQuery(this).data('id')
       that.content_menu.show_on topic
             
@@ -305,7 +304,7 @@ class Mindmap extends Module
     
     # 全局按键事件
     jQuery(document).on 'keydown', (evt)=>
-      console.log "keyCode: " + evt.keyCode
+      # console.log "keyCode: " + evt.keyCode
 
       if @active_topic  
         switch evt.keyCode
@@ -475,17 +474,17 @@ bind_events = (mindmap)->
     jQuery('.mindmap-ops .scale span.value').html mindmap.scale
 
 
-jQuery(document).ready ->
-  # mindmap = prepare_mindmap mindmap
-  # json_to_mindmap()
-  if false #json = localStorage['mindmap']
-    # console.log json
-    mindmap = Mindmap.from_json json
-    mindmap.layout()
-    bind_events mindmap
-  else
-    # json_to_mindmap()
-    read_textarea()
+# jQuery(document).ready ->
+#   # mindmap = prepare_mindmap mindmap
+#   # json_to_mindmap()
+#   if false #json = localStorage['mindmap']
+#     # console.log json
+#     mindmap = Mindmap.from_json json
+#     mindmap.layout()
+#     bind_events mindmap
+#   else
+#     # json_to_mindmap()
+#     read_textarea()
 
 
 window.Mindmap = Mindmap
