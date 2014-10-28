@@ -18,7 +18,7 @@ $topic-box-shadow:1px 1px 3px rgba(black, 0.4);
 
 @import "mixin";
 
-$fa-font-path: "font-awesome-4.2.0/fonts";
+$fa-font-path: "font-awesome-4.2.0/fonts" !default;
 @import "font-awesome-4.2.0/scss/font-awesome.scss";
 
 
